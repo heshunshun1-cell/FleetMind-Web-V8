@@ -51,7 +51,12 @@
         <div class="card">
             <h2>Risk and Suggestion</h2>
 
-            <p><strong>Risk Level:</strong> {{ truck.get_risk_level() }}</p>
+            <p>
+                <strong>Risk Level:</strong> 
+                <span class="risk-badge {{ truck.get_risk_class() }}">
+                    {{ truck.get_risk_level() }}
+                </span>
+            </p>
 
             <!-- 
                 get_highest_cost_category() 会返回两个结果：

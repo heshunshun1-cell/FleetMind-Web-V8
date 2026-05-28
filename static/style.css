@@ -171,3 +171,36 @@ pre {
     border-radius: 8px;
     border-left: 5px solid #856404;
 }
+
+/* 风险等级标签的基础样式 */
+.risk-badge {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 999px;
+    font-weight: bold;
+    font-size: 13px;
+}
+
+/* Excellent：绿色，表示表现优秀 */
+.risk-excellent {
+    background-color: #e6f6ea;
+    color: #1f7a3f;
+}
+
+/* Normal：蓝色，表示正常 */
+.risk-normal {
+    background-color: #e8f0ff;
+    color: #1f3c88;
+}
+
+/* Warning：橙色，表示需要注意 */
+.risk-warning {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+/* High Risk：红色，表示高风险 */
+.risk-high {
+    background-color: #fdecea;
+    color: #b42318;
+}

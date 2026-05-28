@@ -57,7 +57,12 @@
                     <td>${{ "{:,.2f}".format(truck.revenue) }}</td>
                     <td>${{ "{:,.2f}".format(truck.calculate_profit()) }}</td>
                     <td>{{ "{:.2f}".format(truck.calculate_profit_margin()) }}%</td>
-                    <td>{{ truck.get_risk_level() }}</td>
+                    <td>
+                        <span class="risk-badge {{ truck.get_risk_class() }}">
+                            {{ truck.get_risk_level() }}
+                        </span>
+                    </td>
+                    
                     <td>{{ truck.get_highest_cost_category()[0] }}</td>
                 </tr>
                 {% endfor %}

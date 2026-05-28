@@ -31,7 +31,13 @@
 
                     <!-- 这里调用 Truck class 里的方法，计算利润率和风险等级 -->
                     <p><strong>Profit Margin:</strong> {{ "{:.2f}".format(truck.calculate_profit_margin()) }}%</p>
-                    <p><strong>Risk Level:</strong> {{ truck.get_risk_level() }}</p>
+                    <p>
+                        <strong>Risk Level:</strong>
+                        <span class="risk-badge {{ truck.get_risk_class() }}">
+                            {{ truck.get_risk_level() }}
+                        </span>
+                    </p>
+
 
                     <!-- 
                         loop.index0 表示当前车辆在列表中的位置，从 0 开始。

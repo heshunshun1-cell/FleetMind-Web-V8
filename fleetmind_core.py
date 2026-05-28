@@ -44,6 +44,22 @@ class Truck:
         else:
             return 'High Risk'
         
+
+    def get_risk_class(self):
+        # 根据风险等级返回对应的 CSS class 名称。
+        # 这个方法不负责计算风险，只负责告诉网页应该用什么颜色。
+        risk_level = self.get_risk_level()
+
+        if risk_level == 'Excellent':
+            return 'risk-excellent'
+        elif risk_level == 'Normal':
+            return 'risk-normal'
+        elif risk_level == 'Warning':
+            return 'risk-warning'
+        else:
+            return 'risk-high'
+
+     
     def get_highest_cost_category(self):
         costs = {'Fuel Cost': self.fuel_cost,
                  'Toll Cost': self.toll_cost,
