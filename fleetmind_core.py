@@ -412,6 +412,76 @@ def compare_trucks(trucks):
 
     return sorted_trucks, best_truck, highest_risk_truck
 
+# ==== Fleet Dashboard ====
+# 计算dashboard的统计数据
+def get_dashboard_data():
+    # 读取csv所有车辆记录
+    records = read_trucks_from_csv()
+    # 统计车辆数据
+    truck_count = len(records)
+
+    # 初始化统计变量
+    total_revenue = 0
+    total_cost = 0
+    total_profit = 0
+    total_margin = 0
+    high_risk_count = 0
+    best_truck = None
+    worst_truck = None
+    # 统计各类成本压力出现次数
+    cost_pressure_count = {}
+    
+    # 遍历所有车辆记录
+    for record in records:
+        total_revenue += float(record["revenue"])
+        total_cost += float(record["total_cost"])
+        total_profit += float(record["profit"])
+        total_margin += float(record["profit_margin"])
+        
+        # 统计高风险车辆数量
+        if record["risk_level"] == "High Risk":
+            high_risk_count += 1
+        # 找出利润最高
+        if best_truck is None or float(record["profit_margin"]) > float(best_truck["profit_margin"]):
+            best_truck = record
+        # 找出利润最低
+        if worst_truck is None or float(record["profit_margin"]) < float(worst_truck["profit_margin"]):
+            worst_truck = record
+
+        # 统计主要成本压力类别
+        category = record["highest_cost_category"]
+
+        if category not in cost_pressure_count:
+            cost_pressure_count[category] = 1
+        else:
+            cost_pressure_count[category] += 1
+
+    # 计算平均利润率，防止为0的情况
+    if truck_count == 0:
+        average_profit_margin = 0
+    else:
+        average_profit_margin = total_margin / truck_count
+    
+    # 找出出现次数最多的成本压力
+    if len(cost_pressure_count) == 0:
+        most_common_cost_pressure = "No data"
+    else:
+        most_common_cost_pressure = max(cost_pressure_count, key=cost_pressure_count.get)
+
+    # 返回dashboard需要的数据
+    return {
+        "truck_count": truck_count,
+        "total_revenue": total_revenue,
+        "total_cost": total_cost,
+        "total_profit": total_profit,
+        "average_profit_margin": average_profit_margin,
+        "high_risk_count": high_risk_count,
+        "best_truck": best_truck,
+        "worst_truck": worst_truck,
+        "most_common_cost_pressure": most_common_cost_pressure
+    }
+
+
 
 def get_ai_response(question):
     # 这个功能不是真正的大模型 AI。

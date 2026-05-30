@@ -1,255 +1,587 @@
-## V2 更新：CSV 数据存储功能
+# FleetMind-Web-V3
 
-在 V1 版本里，FleetMind 已经可以完成基本的物流车辆分析，比如分析 sample truck、新增一辆 truck、计算收入、成本、利润、利润率、风险等级和主要成本压力。那个版本也有一个 `fleet_history.txt`，可以保存分析历史。
+## 项目简介
 
-但是后来我发现，`fleet_history.txt` 更像是给人看的文字记录。它可以记录分析结果，但不太适合后面继续做数据分析。比如我想做 records 页面、dashboard、利润排名、成本图表的时候，普通 txt 文件就不太方便了。
+FleetMind-Web-V3 是我在 FleetMind-Web-V2 基础上继续升级出来的物流数据分析 Web 项目。
 
-所以在 V2 版本里，我增加了一个新的结构化数据文件：
+V2 版本已经实现了：
+
+* 用户新增 Truck 数据
+* 自动计算收入、成本、利润、利润率和风险等级
+* 将新增车辆保存到 `fleet_data.csv`
+* 在 Records 页面查看历史保存记录
+
+但是 V2 主要还是偏向“单条记录保存”和“历史记录查看”。
+
+所以在 V3 中，我想进一步升级成一个更像真实物流管理系统的版本：
+
+> 不只是看一辆车，而是从整个车队角度看运营情况。
+
+因此，V3 的核心目标是新增一个 Fleet Dashboard。
+
+---
+
+## 从 V2 到 V3 的升级目标
+
+V2 的功能重点是：
+
+```text
+Add Truck
+↓
+Analyse Truck
+↓
+Save to CSV
+↓
+View Records
+```
+
+V3 的升级重点是：
+
+```text
+Read CSV
+↓
+Calculate Fleet Statistics
+↓
+Show Dashboard
+```
+
+也就是说，V3 不再只是保存数据，而是开始利用已有数据做统计分析。
+
+---
+
+## V3 新增功能
+
+### 1. Fleet Dashboard 页面
+
+V3 新增了一个页面：
+
+```text
+/dashboard
+```
+
+对应文件：
+
+```text
+templates/dashboard.html
+```
+
+这个页面会读取 `fleet_data.csv` 中已经保存的车辆记录，并显示整体运营统计结果。
+
+---
+
+### 2. Dashboard 统计指标
+
+目前 Dashboard 显示以下指标：
+
+* Truck Count
+* Total Revenue
+* Total Cost
+* Total Profit
+* Average Profit Margin
+* High Risk Trucks
+* Best Performing Truck
+* Lowest Margin Truck
+* Most Common Cost Pressure
+
+这些指标让系统从“单车分析工具”开始变成一个“小型车队运营看板”。
+
+---
+
+### 3. 新增 `get_dashboard_data()`
+
+在 `fleetmind_core.py` 中，我新增了：
+
+```python
+def get_dashboard_data():
+```
+
+这个函数负责：
+
+```text
+读取 CSV 文件
+↓
+遍历所有车辆记录
+↓
+累加收入、成本、利润和利润率
+↓
+统计高风险车辆数量
+↓
+找出表现最好和利润率最低的车辆
+↓
+统计最常见的成本压力
+↓
+把结果返回给 Flask 页面
+```
+
+这个函数是 V3 的核心。
+
+它让 Dashboard 页面不只是静态网页，而是可以根据 CSV 数据动态生成统计结果。
+
+---
+
+## V3 的开发过程
+
+### 第一步：先写数据逻辑，而不是先写页面
+
+一开始我没有直接写 `dashboard.html`，而是先在 `fleetmind_core.py` 里写：
+
+```python
+get_dashboard_data()
+```
+
+我觉得这是这次升级里比较重要的一点。
+
+因为 Dashboard 本质上不是先有网页，而是先有数据统计逻辑。
+
+所以开发顺序是：
+
+```text
+fleetmind_core.py
+先处理数据
+
+↓
+
+app.py
+再添加 Flask route
+
+↓
+
+dashboard.html
+最后显示到网页上
+```
+
+这样比直接写 HTML 更清楚，也更容易 Debug。
+
+---
+
+### 第二步：在 Flask 中新增 `/dashboard`
+
+在 `app.py` 中，我新增了：
+
+```python
+@app.route("/dashboard")
+def dashboard():
+    data = get_dashboard_data()
+    return render_template("dashboard.html", data=data)
+```
+
+一开始我没有直接连接 HTML，而是先用：
+
+```python
+return str(data)
+```
+
+测试数据能不能正常显示。
+
+确认数据正常后，才改成：
+
+```python
+return render_template("dashboard.html", data=data)
+```
+
+这个过程让我意识到：
+
+> 写 Web 项目时，不要一上来就美化页面，应该先确认数据是对的。
+
+---
+
+### 第三步：创建 Dashboard 页面
+
+之后我新建了：
+
+```text
+templates/dashboard.html
+```
+
+最开始只是简单显示：
+
+```html
+<p>Truck Count: {{ data.truck_count }}</p>
+```
+
+后来再慢慢改成卡片式布局。
+
+现在 Dashboard 使用了卡片结构来显示不同指标，看起来更像一个真实系统的运营面板。
+
+---
+
+## V3 中遇到的问题和解决方法
+
+### 1. records 和 record 混淆
+
+在写高风险车辆统计时，我一开始写错了：
+
+```python
+records["risk_level"]
+```
+
+结果报错：
+
+```text
+TypeError: list indices must be integers or slices, not str
+```
+
+后来发现原因是：
+
+```python
+records
+```
+
+是整个列表。
+
+而：
+
+```python
+record
+```
+
+才是循环里的单条数据。
+
+正确写法应该是：
+
+```python
+for record in records:
+    if record["risk_level"] == "High Risk":
+        high_risk_count += 1
+```
+
+这个错误让我更清楚地理解了：
+
+```text
+records = list
+record = dict
+record["risk_level"] = 当前车辆的风险等级
+```
+
+这个点虽然基础，但对理解 CSV 数据读取非常重要。
+
+---
+
+### 2. CSV 读取出来的数字都是字符串
+
+`read_trucks_from_csv()` 读取出来的数据虽然看起来像数字，但其实都是字符串。
+
+比如：
+
+```python
+record["revenue"]
+```
+
+读出来是：
+
+```python
+"68000"
+```
+
+不是：
+
+```python
+68000
+```
+
+所以在 Dashboard 统计时，必须写：
+
+```python
+float(record["revenue"])
+```
+
+同样地，利润、成本、利润率都要转换成 `float` 后才能计算。
+
+---
+
+### 3. Dashboard 一开始只显示字典
+
+最开始访问 `/dashboard` 时，页面只是显示：
+
+```python
+{'truck_count': 2, 'total_revenue': 500000.0}
+```
+
+虽然很丑，但这个步骤很有用，因为它证明后端数据已经算出来了。
+
+后来我才把它接入：
+
+```html
+dashboard.html
+```
+
+这让我学到一个开发习惯：
+
+> 先让功能跑通，再慢慢让它变好看。
+
+---
+
+### 4. CSS class 名字影响了其他页面
+
+Dashboard 一开始使用了：
+
+```css
+.card
+```
+
+但是项目里其他页面，比如 Sample Trucks 页面，也用了 `.card`。
+
+结果 Dashboard 的样式影响到了 Sample Trucks 页面，导致原来的页面样式变了。
+
+后来我把 Dashboard 的卡片 class 改成：
+
+```css
+.dashboard-card
+```
+
+这样 Dashboard 的样式就不会影响其他页面。
+
+这个问题让我第一次比较直观地理解了：
+
+> CSS class 命名不能太随意，不然不同页面之间会互相污染。
+
+---
+
+### 5. Dashboard 上色一开始不生效
+
+我想给 Dashboard 里的利润和风险数字上色，比如：
+
+* 正利润显示绿色
+* 高风险车辆数量显示红色
+
+但是一开始颜色没有变化。
+
+后来发现是因为我之前写了：
+
+```css
+.dashboard-card p {
+    color: #1f4e79;
+}
+```
+
+这条规则把所有 Dashboard 卡片里的 `<p>` 都固定成了蓝色。
+
+后来我用更具体的 CSS 选择器覆盖：
+
+```css
+.dashboard-card p.profit-positive {
+    color: #1f8f4d;
+}
+
+.dashboard-card p.profit-negative {
+    color: #c0392b;
+}
+```
+
+这样颜色才正常显示。
+
+这次问题让我学到了 CSS 优先级。
+
+---
+
+## V3 当前效果
+
+现在 V3 的 Dashboard 可以显示：
+
+```text
+Truck Count
+Total Revenue
+Total Cost
+Total Profit
+Average Profit Margin
+High Risk Trucks
+Best Performing Truck
+Lowest Margin Truck
+Most Common Cost Pressure
+```
+
+其中：
+
+* Total Profit 为正时显示绿色
+* Average Profit Margin 表现好时显示绿色
+* High Risk Trucks 大于 0 时显示红色
+* 普通统计数据保持蓝色
+
+整体视觉比 V2 更清楚，也更像一个运营分析页面。
+
+---
+
+## Dashboard 数据来源说明
+
+目前 Dashboard 只统计：
 
 ```text
 fleet_data.csv
 ```
 
-这个 CSV 文件用来保存用户在网页里新增的 truck 数据。每次用户在 `Add and Analyse a New Truck` 页面提交一辆新车后，系统会同时保存两份内容：
+里面保存的车辆记录。
+
+它不会统计 Sample Trucks 页面里的样本数据。
+
+这样设计是故意的，因为 Sample Trucks 是演示数据，如果混入 Dashboard，会影响真实保存记录的统计结果。
+
+所以当前逻辑是：
 
 ```text
-fleet_history.txt：保存文字版分析历史
-fleet_data.csv：保存结构化车辆数据
-```
+Sample Trucks
+= 用于演示和测试
 
-这样 FleetMind 就不只是一个“算完就结束”的小工具，而是开始有一点数据系统的感觉了。
+CSV Records
+= 用户真实保存的数据
+
+Dashboard
+= 基于 CSV Records 的统计分析
+```
 
 ---
 
-### V2 新增了什么？
+## V2 和 V3 的区别
 
-这次 V2 主要增加了这些功能：
+| 版本 | 主要功能                  | 特点            |
+| -- | --------------------- | ------------- |
+| V2 | CSV Storage + Records | 可以保存和查看车辆记录   |
+| V3 | Fleet Dashboard       | 可以统计和分析整体车队表现 |
 
-* 新增 `fleet_data.csv`，用来保存结构化车辆记录
-* 在 `fleetmind_core.py` 里新增 `save_truck_to_csv(truck)`
-* 在 `fleetmind_core.py` 里新增 `read_trucks_from_csv()`
-* 修改 `/new-truck` 路由，让新增 truck 后自动保存到 CSV
-* 新增 `/records` 页面
-* 新增 `records.html`
-* 在首页增加 `View Saved Truck Records` 按钮
-* 在 records 页面用表格展示 CSV 里的车辆记录
-* records 页面里的 profit 会根据正负显示不同颜色
-* records 页面里的 risk level 也会用颜色显示
-* result 页面现在会显示 CSV 是否保存成功
-
----
-
-### 这次升级的主要难点
-
-这次升级看起来只是“加一个 CSV 文件”，但实际做的时候遇到了不少小问题。
-
-第一个问题是：CSV 文件出现了，但数据不一定真的保存成功。
-
-刚开始我看到 `fleet_data.csv` 出来了，以为功能已经成功了。但后来发现，文件被创建出来不代表数据完整写进去了。因为 Python 在执行 `open(CSV_FILE, "a")` 的时候，如果文件不存在，会先创建文件。可是后面写入数据时，如果某一行代码出错，文件还是会存在，但数据可能没写完整。
-
-这个让我理解了一个点：
-**文件存在，不等于功能成功。**
-
-后来我在 `app.py` 里加了：
-
-```python
-print("CSV saved:", csv_saved)
-```
-
-这样每次提交 new truck 后，terminal 会告诉我：
+简单来说：
 
 ```text
-CSV saved: True
+V2 让系统能“记住数据”
+V3 让系统能“分析数据”
 ```
 
-或者：
+这是这次升级最大的变化。
+
+---
+
+## 当前项目结构
 
 ```text
-CSV saved: False
-```
+FleetMind-Web-V3
 
-这比我自己猜要清楚很多。
+app.py
+fleetmind_core.py
+fleet_data.csv
+fleet_history.txt
+
+templates/
+│
+├── index.html
+├── result.html
+├── records.html
+├── samples.html
+├── compare.html
+├── assistant.html
+├── history.html
+├── new_truck.html
+└── dashboard.html
+
+static/
+│
+└── style.css
+
+README.md
+```
 
 ---
 
-### Debug 过程中遇到的错误
+## 当前技术栈
 
-这次我遇到了几个很典型的 Python 初学者错误。
+V3 使用到的技术包括：
 
-#### 1. `exists` 拼错了
+* Python
+* Flask
+* HTML
+* CSS
+* CSV
+* Jinja2 Template
+* Git
+* GitHub
 
-我一开始把：
-
-```python
-os.path.exists(CSV_FILE)
-```
-
-写成了类似：
-
-```python
-os.path.exisits(CSV_FILE)
-```
-
-结果 Python 报错，说这个方法不存在。
-
-这个问题说明 Python 对拼写非常严格。哪怕只是多一个字母，程序也不会自动帮我理解。
+目前还没有使用数据库，数据仍然保存在 CSV 文件中。
 
 ---
 
-#### 2. `newline` 写错了
+## 我对 V3 的理解
 
-写 CSV 的时候，正确写法应该是：
+FleetMind-Web-V3 对我来说不是一次大重写，而是在 V2 基础上的一次自然升级。
 
-```python
-with open(CSV_FILE, "a", newline="", encoding="utf-8") as file:
-```
+V2 解决了：
 
-但我一开始把 `newline=""` 写错了，导致出现了 newline value 的错误。
+> 数据怎么保存？
 
-这个问题让我明白，CSV 文件写入时，`newline=""` 是一个比较标准的写法，可以避免换行格式出问题。
+V3 继续解决：
 
----
+> 保存下来的数据怎么分析？
 
-#### 3. `fuel_cost` 拼成了 `fule_cost`
+这让我感觉这个项目开始从一个简单练习，慢慢变成一个有结构的小型业务系统。
 
-还有一次我把：
-
-```python
-truck.fuel_cost
-```
-
-写成了：
-
-```python
-truck.fule_cost
-```
-
-结果 terminal 显示：
+在这次升级中，我学到的最重要的东西不是某一行代码，而是整个开发流程：
 
 ```text
-'Truck' object has no attribute 'fule_cost'
+先确认数据来源
+↓
+写核心统计函数
+↓
+用 Flask route 测试
+↓
+再连接 HTML 页面
+↓
+最后优化 CSS 和用户体验
 ```
 
-这个错误其实很有帮助。它告诉我，`Truck` object 里面根本没有 `fule_cost` 这个属性。后来我回去检查 `Truck` class，发现正确名字是 `fuel_cost`。
-
-这个也让我更理解了 class 里面 `self.xxx` 的意义：
-如果 class 里定义的是 `self.fuel_cost`，后面就必须用 `truck.fuel_cost`，不能随便拼错。
+这个过程让我更像是在做一个真实项目，而不是只完成一道作业题。
 
 ---
 
-#### 4. 5000 端口被占用
+## 下一步计划
 
-还有一个比较奇怪的问题是，我访问：
+### V4：Data Visualization
 
-```text
-127.0.0.1:5000
-```
+下一版计划加入图表功能，例如：
 
-有时候会出现 403 Forbidden。
+* Revenue Bar Chart
+* Profit Bar Chart
+* Risk Distribution Chart
+* Cost Pressure Distribution Chart
 
-一开始我以为是 Flask route 写错了，后来用 curl 测试才发现，5000 端口有时候会被 macOS 的 AirTunes / AirPlay 服务占用。也就是说，我访问的可能不是 Flask，而是 Mac 系统自己的服务。
-
-后来我尝试把 Flask 改成：
-
-```python
-app.run(debug=True, port=5001)
-```
-
-然后用：
-
-```text
-127.0.0.1:5001
-```
-
-就能正常访问了。
-
-这个问题让我意识到：
-**网页打不开，不一定都是代码错了，也可能是本地环境或端口的问题。**
+这样 Dashboard 不只是显示数字，也能通过图表展示趋势和结构。
 
 ---
 
-### 我是怎么解决这些问题的？
+### V5：SQLite Database
 
-这次我主要用了一个比较简单但有效的 debug 方法：
+目前系统使用 CSV 保存数据。
 
-1. 先确认函数有没有被调用
-2. 用 `print()` 打印结果
-3. 如果返回 `False`，就打印具体错误
-4. 根据 terminal 里的错误信息一点点修改
-5. 每改一个地方，就重新测试一次
+未来希望把 CSV 升级成 SQLite，让数据管理更接近真实系统。
 
-我把原来简单的：
+目标包括：
 
-```python
-except:
-    return False
-```
-
-改成了：
-
-```python
-except Exception as e:
-    print("CSV save error:", e)
-    return False
-```
-
-这个改动非常有用。因为它能直接告诉我 CSV 保存失败的原因，而不是只返回一个 `False`。
-
-我觉得这次最大的收获不是单纯写出了 CSV 功能，而是慢慢学会了怎么定位问题。以前我看到报错会比较慌，现在会先看 terminal，找关键词，再判断是拼写问题、文件问题、变量问题，还是端口问题。
+* 查询记录
+* 删除记录
+* 修改记录
+* 按风险等级筛选
+* 按路线筛选
+* 按司机筛选
 
 ---
 
-### V2 完成后的效果
+## 总结
 
-现在 FleetMind V2 已经可以做到：
+FleetMind-Web-V3 是我从 V2 继续升级出来的版本。
 
-```text
-用户提交 new truck
-→ Flask 接收表单数据
-→ 创建 Truck object
-→ 计算 revenue、cost、profit、profit margin、risk level
-→ 保存文字历史到 fleet_history.txt
-→ 保存结构化数据到 fleet_data.csv
-→ result 页面显示保存成功
-→ records 页面读取 CSV 并显示表格
-```
-
-records 页面现在可以展示：
-
-* Truck ID
-* Driver
-* Route
-* Revenue
-* Total Cost
-* Profit
-* Profit Margin
-* Risk Level
-* Main Cost Pressure
-
-其中 profit 和 risk level 也有颜色显示，看起来比纯文字更清楚。
-
----
-
-### 这次 V2 的意义
-
-我觉得 V2 是 FleetMind 从“课程小项目”往“真实一点的 web app”升级的一步。
-
-V1 更像是一个可以演示的 Flask 页面。
-V2 开始有了数据保存和数据读取。
-
-虽然现在还是用 CSV，不是数据库，但它已经有了一个很重要的基础：
+这次升级的核心是：
 
 ```text
-用户输入的数据可以被保存下来，并且可以被再次读取和展示。
+从 Records 页面
+升级到 Dashboard 页面
 ```
 
-这为后面的 V3 dashboard 做了准备。以后我可以基于 `fleet_data.csv` 做：
+也就是从“保存数据”走向“分析数据”。
 
-* 利润趋势分析
-* 成本结构分析
-* 高风险车辆统计
-* 不同路线盈利能力比较
-* 图表 dashboard
-* 后续甚至可以换成 SQLite 或 PostgreSQL 数据库
+这个过程中我遇到了不少问题，比如：
 
-所以 V2 对我来说不是简单地加了一个文件，而是让 FleetMind 开始有了真正的数据基础。
+* `records` 和 `record` 混淆
+* CSV 数字需要转换成 `float`
+* CSS class 影响其他页面
+* Dashboard 颜色被 CSS 优先级覆盖
+
+但这些问题最后都被一步步解决了。
+
+所以 V3 不只是功能升级，也是我对 Web 项目结构、数据处理和前端样式理解的一次升级。
+
+FleetMind 还会继续迭代。

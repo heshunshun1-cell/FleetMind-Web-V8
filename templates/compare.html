@@ -20,13 +20,22 @@
 
             <p><strong>Best Performing Truck:</strong> {{ best_truck.truck_id }}</p>
             <p><strong>Best Route:</strong> {{ best_truck.route }}</p>
-            <p><strong>Best Profit Margin:</strong> {{ "{:.2f}".format(best_truck.calculate_profit_margin()) }}%</p>
-
+            <p>
+                <strong>Best Profit Margin:</strong>
+                <span class="profit-positive">
+                    {{ "%.2f"|format(best_truck.calculate_profit_margin()) }}%
+                </span>
+            </p>
             <hr>
 
             <p><strong>Highest Risk Truck:</strong> {{ highest_risk_truck.truck_id }}</p>
             <p><strong>Highest Risk Route:</strong> {{ highest_risk_truck.route }}</p>
-            <p><strong>Lowest Profit Margin:</strong> {{ "{:.2f}".format(highest_risk_truck.calculate_profit_margin()) }}%</p>
+            <p>
+                <strong>Lowest Profit Margin:</strong>
+                <span class="{{ highest_risk_truck.get_profit_class() }}">
+                    {{ "%.2f"|format(highest_risk_truck.calculate_profit_margin()) }}%
+                </span>
+            </p>
         </div>
 
         <!-- 显示所有车辆排序表格 -->

@@ -14,7 +14,8 @@ from fleetmind_core import (
     read_trucks_from_csv,
     read_analysis_history,
     compare_trucks,
-    get_ai_response
+    get_ai_response,
+    get_dashboard_data
 )
 
 
@@ -193,6 +194,14 @@ def records():
 # Flask 调用 read_trucks_from_csv()
 # 读取 fleet_data.csv
 # 把 records 传给 records.html
+
+# dashboard页面
+@app.route("/dashboard")
+def dashboard():
+    # 读取csv并计算dashboard数据
+    data = get_dashboard_data()
+    # 把dashboard数据传给网页
+    return render_template("dashboard.html", data=data)
 
 
 # 程序入口
