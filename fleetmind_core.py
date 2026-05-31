@@ -702,6 +702,74 @@ def generate_cost_pressure_chart():
     plt.close()
 
 
+# Analytics Summary Data
+def get_analytics_summary():
+    import csv
+
+    trucks = []
+    total_revenue = 0
+    total_profit = 0
+    total_margin = 0
+    loss_making_count = 0
+
+    # 读取CSV里车辆数据
+    with open("fleet_data.csv", "r", newline="", encoding="utf-8") as file:
+        reader = csv.DictReader(file)
+
+        for row in reader:
+            revenue = float(row["revenue"])
+            profit = float(row["profit"])
+            profit_margin = float(row["profit_margin"])
+
+            trucks.append(row)
+            total_revenue += revenue
+            total_profit += profit
+            total_margin += profit_margin
+
+            if profit < 0:
+                loss_making_count += 1
+
+    truck_count = len(trucks)
+
+    if truck_count > 0:
+        average_profit_margin = total_margin / truck_count
+    else:
+        average_profit_margin = 0
+
+    return {
+        "total_revenue": total_revenue,
+        "total_profit": total_profit,
+        "average_profit_margin": average_profit_margin,
+        "loss_making_count": loss_making_count
+    }
+
+
+# Loss-making Truck Data
+
+def get_loss_making_trucks():
+    import csv
+    loss_making_trucks = []
+    # 读取CSV 筛选亏损车辆
+    with open("fleet_data.csv", "r", newline="", encoding="utf-8") as file:
+        reader = csv.DictReader(file)
+   
+        for row in reader:
+            profit = float(row["profit"])
+            # 只保留利润为负的车辆
+            if profit < 0:
+                loss_making_trucks.append({
+                    "truck_id": row["truck_id"],
+                    "revenue": float(row["revenue"]),
+                    "total_cost": float(row["total_cost"]),
+                    "profit": profit,
+                    "risk_level": row["risk_level"],
+                    "highest_cost_category": row["highest_cost_category"]
+                })
+
+    return loss_making_trucks
+
+
+
 def get_ai_response(question):
     # 这个功能不是真正的大模型 AI。
     # 它是一个 keyword-based assistant，也就是基于关键词的简单问答助手。

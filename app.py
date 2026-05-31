@@ -20,6 +20,8 @@ from fleetmind_core import (
     generate_profit_chart,
     generate_risk_chart,
     generate_cost_pressure_chart,
+    get_analytics_summary,
+    get_loss_making_trucks
 )
 
 
@@ -215,8 +217,15 @@ def analytics():
     generate_profit_chart()
     generate_risk_chart()
     generate_cost_pressure_chart()
+    # 获取analytics页面汇总数据
+    summary = get_analytics_summary()
+    # 获取亏损车辆数据
+    loss_trucks = get_loss_making_trucks()
 
-    return render_template("analytics.html")
+    return render_template("analytics.html", 
+                           summary=summary,
+                           loss_trucks=loss_trucks
+                           )
 
 
 # 程序入口

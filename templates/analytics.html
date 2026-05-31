@@ -13,6 +13,73 @@
             This page shows visual analytics generated from fleet_data.csv.
         </p>
 
+
+        <div class="summary-grid">
+            <div class="card">
+                <h3>Total Revenue</h3>
+                <p>${{ "%.2f"|format(summary.total_revenue) }}</p>
+            </div>
+
+            <div class="card">
+                <h3>Total Profit</h3>
+
+                {% if summary.total_profit >= 0 %}
+                    <p class="positive-value">${{ "%.2f"|format(summary.total_profit) }}</p>
+                {% else %}
+                    <p class="negative-value">${{ "%.2f"|format(summary.total_profit) }}</p>
+                {% endif %}
+            </div>
+
+            <div class="card">
+                <h3>Average Profit Margin</h3>
+                
+                {% if summary.average_profit_margin >= 20 %}
+                    <p class="positive-value">{{ "%.2f"|format(summary.average_profit_margin) }}%</p>
+                {% elif summary.average_profit_margin < 0 %}
+                    <p class="negative-value">{{ "%.2f"|format(summary.average_profit_margin) }}%</p>
+                {% else %}
+                    <p class="normal-value">{{ "%.2f"|format(summary.average_profit_margin) }}%</p>
+                {% endif %}
+            </div>
+
+            <div class="card">
+                <h3>Loss-making Trucks</h3>
+
+                {% if summary.loss_making_count > 0 %}
+                    <p class="negative-value">{{ summary.loss_making_count }}</p>
+                {% else %}
+                    <p class="positive-value">{{ summary.loss_making_count }}</p>
+                {% endif %}
+            </div>
+
+        </div>
+
+
+       <div class="card">
+           <h2>Loss-making Trucks</h2>
+           
+           {% if loss_trucks %}
+           
+               <p>The following trucks are currently making a loss.</p>
+
+               {% for truck in loss_trucks %}
+                   <div class="loss-item">
+                       <h3>{{ truck.truck_id }}</h3>
+                       <p>Revenue: ${{ "%.2f"|format(truck.revenue) }}</p>
+                       <p>Total Cost: ${{ "%.2f"|format(truck.total_cost) }}</p>
+                       <p class="negative-value">Profit: ${{ "%.2f"|format(truck.profit) }}</p>
+                       <p>Risk Level: {{ truck.risk_level }}</p>
+                       <p>Main Cost Pressure: {{ truck.highest_cost_category }}</p>
+                    </div>
+               {% endfor %}
+               
+           {% else %}
+               <p>No loss-making trucks detected.</p>
+
+           {% endif %}
+        </div>
+
+
         <div class="card">
             <h2>Revenue by Truck</h2>
             <p>Each bar shows the revenue of one truck.</p>
