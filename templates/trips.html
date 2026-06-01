@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>FleetMind Trip Records</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <div class="container">
+        <h1>FleetMind Trip Records</h1>
+
+        <p class="description">
+            This page shows trip-level transportation records stored in the
+            <strong>FleetMind SQLite database</strong>.
+        </p>
+
+        <!-- Trip Summary Cards -->
+        <div class="summary-grid">
+            <div class="card">
+                <h3>Total Trips</h3>
+                <p>{{ summary.total_trips }}</p>
+            </div>
+
+            <div class="card">
+                <h3>Total Trip Revenue</h3>
+                <p>${{ "{:,.2f}".format(summary.total_revenue) }}</p>
+            </div>
+
+            <div class="card">
+                <h3>Total Trip Profit</h3>
+                {% if summary.total_profit >= 0 %}
+                    <p class="positive-value">${{ "{:,.2f}".format(summary.total_profit) }}</p>
+                {% else %}
+                    <p class="negative-value">${{ "{:,.2f}".format(summary.total_profit) }}</p>
+                {% endif %}
+            </div>
+
+            <div class="card">
+                <h3>Average Cost / KM</h3>
+                <p>${{ "%.2f"|format(summary.average_cost_per_km) }}</p>
+            </div>
+
+            <div class="card">
+                <h3>High Delay Trips</h3>
+                <p>{{ summary.high_delay_count }}</p>
+            </div>
+
+            <div class="card">
+                <h3>Loss-making Trips</h3>
+                <p>{{ summary.loss_making_count }}</p>
+            </div>
+        </div>
+
+        <!-- Trip Records Table -->
+        {% if trips %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Trip ID</th>
+                        <th>Truck ID</th>
+                        <th>Driver</th>
+                        <th>Route</th>
+                        <th>Distance</th>
+                        <th>Revenue</th>
+                        <th>Total Cost</th>
+                        <th>Profit</th>
+                        <th>Profit Margin</th>
+                        <th>Cost / KM</th>
+                        <th>Delay Hours</th>
+                        <th>Risk Level</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for trip in trips %}
+                    <tr>
+                        <td>{{ trip["trip_id"] }}</td>
+                        <td>{{ trip["truck_id"] }}</td>
+                        <td>{{ trip["driver"] }}</td>
+                        <td>{{ trip["route"] }}</td>
+                        <td>{{ "%.0f"|format(trip["distance"]) }} km</td>
+                        <td>${{ "{:,.2f}".format(trip["revenue"]) }}</td>
+                        <td>${{ "{:,.2f}".format(trip["total_cost"]) }}</td>
+
+                        {% if trip["profit"] >= 0 %}
+                            <td class="profit-positive">${{ "{:,.2f}".format(trip["profit"]) }}</td>
+                        {% else %}
+                            <td class="profit-negative">${{ "{:,.2f}".format(trip["profit"]) }}</td>
+                        {% endif %}
+
+                        <td>{{ "%.2f"|format(trip["profit_margin"]) }}%</td>
+                        <td>${{ "%.2f"|format(trip["cost_per_km"]) }}</td>
+                        <td>{{ "%.1f"|format(trip["delay_hours"]) }} h</td>
+
+                        {% if trip["risk_level"] == "Excellent" %}
+                            <td class="risk-excellent">{{ trip["risk_level"] }}</td>
+                        {% elif trip["risk_level"] == "Normal" %}
+                            <td class="risk-normal">{{ trip["risk_level"] }}</td>
+                        {% elif trip["risk_level"] == "Warning" %}
+                            <td class="risk-warning">{{ trip["risk_level"] }}</td>
+                        {% else %}
+                            <td class="risk-high">{{ trip["risk_level"] }}</td>
+                        {% endif %}
+
+                        <td>{{ trip["trip_date"] }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No trip records found.</p>
+        {% endif %}
+
+        <!-- Trip-Level Insights -->
+        <div class="insight-summary-box">
+            <h2>Trip-Level Insights</h2>
+            <p>
+                FleetMind reviews delay, cost per kilometre, profit, and risk level
+                to identify trips that may need management attention.
+            </p>
+        </div>
+
+        {% if trip_insights %}
+            <div class="insight-list">
+                {% for insight in trip_insights %}
+                    <div class="insight-card">
+                        <div class="insight-header">
+                            Trip Insight {{ loop.index }}
+                        </div>
+                        <p>{{ insight }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>No trip insights available.</p>
+        {% endif %}
+
+        <!-- Navigation Buttons -->
+        <div class="button-group">
+            <a href="/" class="button">Back to Home</a>
+            <a href="/records" class="button">View Truck Records</a>
+            <a href="/dashboard" class="button">View Dashboard</a>
+            <a href="/analytics" class="button">View Analytics</a>
+            <a href="/insights" class="button">View Insights</a>
+        </div>
+    </div>
+</body>
+</html>

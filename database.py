@@ -551,3 +551,168 @@ def save_truck_to_db(truck):
     except Exception as e:
         print("Database save error:", e)
         return False
+    
+
+def read_trips_from_db():
+    """从 SQLite 数据库读取所有运输任务记录"""
+
+    # 连接数据库
+    conn = get_db_connection()
+
+    # 查询 trips 表，并按日期从新到旧排序
+    trips = conn.execute("""
+        SELECT *
+        FROM trips
+        ORDER BY trip_date DESC
+    """).fetchall()
+
+    # 关闭数据库连接
+    conn.close()
+
+    return trips
+
+def get_trip_summary_from_db():
+    """从 SQLite 数据库计算 trip summary 数据"""
+
+    # 连接数据库
+    conn = get_db_connection()
+
+    # 读取所有trip记录
+    trips = conn.execute("SELECT * FROM trips").fetchall()
+
+    # 关闭数据库连接
+    conn.close()
+
+    # 初始化统计变量
+    total_trips = len(trips)
+    total_revenue = 0
+    total_profit = 0
+    total_cost_per_km = 0
+    high_delay_count = 0
+    loss_making_count = 0
+
+    # 遍历每一条 trip
+    for trip in trips:
+        total_revenue += float(trip["revenue"])
+        total_profit += float(trip["profit"])
+        total_cost_per_km += float(trip["cost_per_km"])
+
+        # 延误超过24小时，认为是高延误
+        if float(trip["delay_hours"]) >= 24:
+            high_delay_count += 1
+
+        # 利润小于0，认为是亏损trip
+        if float(trip["profit"]) < 0:
+            loss_making_count += 1
+
+    # 计算平均每公里成本
+    if total_trips == 0:
+        average_cost_per_km = 0
+    else:
+        average_cost_per_km = total_cost_per_km / total_trips
+
+    # 返回trips页面需要的summary数据
+    return {
+        "total_trips": total_trips,
+        "total_revenue": total_revenue,
+        "total_profit": total_profit,
+        "average_cost_per_km": average_cost_per_km,
+        "high_delay_count": high_delay_count,
+        "loss_making_count": loss_making_count
+    }
+
+
+def generate_trip_insights_from_db():
+    """从 SQLite 数据库生成 trip-level 运营建议"""
+
+    # 连接数据库
+    conn = get_db_connection()
+
+    # 读取所有 trip 记录
+    trips = conn.execute("SELECT * FROM trips").fetchall()
+
+    # 关闭数据库连接
+    conn.close()
+
+    # 用来存放 trip insights
+    insights = []
+
+    # 如果没有 trip 数据
+    if len(trips) == 0:
+        insights.append("No trip records found in the database.")
+        return insights
+
+    # 初始化分析对象
+    highest_delay_trip = None
+    highest_cost_per_km_trip = None
+    most_profitable_trip = None
+    lowest_margin_trip = None
+
+    # 遍历每一条 trip
+    for trip in trips:
+        delay_hours = float(trip["delay_hours"])
+        cost_per_km = float(trip["cost_per_km"])
+        profit = float(trip["profit"])
+        profit_margin = float(trip["profit_margin"])
+
+        # 找出延误最高的 trip
+        if highest_delay_trip is None or delay_hours > float(highest_delay_trip["delay_hours"]):
+            highest_delay_trip = trip
+
+        # 找出每公里成本最高的 trip
+        if highest_cost_per_km_trip is None or cost_per_km > float(highest_cost_per_km_trip["cost_per_km"]):
+            highest_cost_per_km_trip = trip
+
+        # 找出利润最高的 trip
+        if most_profitable_trip is None or profit > float(most_profitable_trip["profit"]):
+            most_profitable_trip = trip
+
+        # 找出利润率最低的 trip
+        if lowest_margin_trip is None or profit_margin < float(lowest_margin_trip["profit_margin"]):
+            lowest_margin_trip = trip
+
+        # 单独提示高延误 trip
+        if delay_hours >= 24:
+            insights.append(
+                f"{trip['trip_id']} has a high delay of {delay_hours:.1f} hours on the route {trip['route']}. This trip should be reviewed."
+            )
+
+        # 单独提示高风险 trip
+        if trip["risk_level"] == "High Risk":
+            insights.append(
+                f"{trip['trip_id']} is marked as High Risk. The company should review its pricing and cost structure."
+            )
+
+        # 单独提示亏损 trip
+        if profit < 0:
+            insights.append(
+                f"{trip['trip_id']} is loss-making. Please check revenue, route planning, and operating costs."
+            )
+
+    # 总结：最高延误
+    if highest_delay_trip is not None:
+        insights.append(
+            f"{highest_delay_trip['trip_id']} has the highest delay in the current trip records."
+        )
+
+    # 总结：最高每公里成本
+    if highest_cost_per_km_trip is not None:
+        insights.append(
+            f"{highest_cost_per_km_trip['trip_id']} has the highest cost per kilometre at ${float(highest_cost_per_km_trip['cost_per_km']):.2f}/km."
+        )
+
+    # 总结：最高利润
+    if most_profitable_trip is not None:
+        insights.append(
+            f"{most_profitable_trip['trip_id']} is the most profitable trip with a profit of ${float(most_profitable_trip['profit']):,.2f}."
+        )
+
+    # 总结：最低利润率
+    if lowest_margin_trip is not None:
+        insights.append(
+            f"{lowest_margin_trip['trip_id']} has the lowest profit margin at {float(lowest_margin_trip['profit_margin']):.2f}%."
+        )
+
+    return insights
+
+

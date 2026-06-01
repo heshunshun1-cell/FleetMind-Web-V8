@@ -6,7 +6,7 @@ CSV_FILE = "fleet_data.csv"
 
 
 def create_trucks_table():
-    """创建 trucks 表"""
+    """创建 trucks 表, 从 CSV 导入数据"""
 
     # 连接数据库
     conn = get_db_connection()
@@ -96,6 +96,8 @@ def import_csv_to_db():
     # 保存修改并关闭连接
     conn.commit()
     conn.close()
+
+
 
 
 # 程序从这里开始执行

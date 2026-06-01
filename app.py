@@ -13,7 +13,10 @@ from database import (
     generate_risk_chart_from_db,
     generate_cost_pressure_chart_from_db,
     generate_insights_from_db,
-    save_truck_to_db
+    save_truck_to_db,
+    read_trips_from_db,
+    get_trip_summary_from_db,
+    generate_trip_insights_from_db
 )
 
 # 从我们自己写的 fleetmind_core.py 中导入核心功能
@@ -249,6 +252,25 @@ def insights():
     # 把建议传给 insight.html 页面
     return render_template("insights.html", insights=insights)
 
+# 运输任务记录页面
+@app.route("/trips")
+def trips():
+    # 从 SQLite 数据库读取所有 trip records
+    trips = read_trips_from_db()
+
+    # 从SQLite 计算 trip summary
+    summary = get_trip_summary_from_db()
+
+    # 从 SQLite 生成trip-level insights
+    trip_insights = generate_trip_insights_from_db()
+
+    # 把 trips 传给 trips.html 显示
+    return render_template(
+        "trips.html", 
+        trips=trips,
+        summary=summary,
+        trip_insights=trip_insights
+        )
 
 
 # 程序入口
