@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit Trip</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <div class="container">
+        <h1>Edit Trip</h1>
+
+        <p class="description">
+            Update this trip record. FleetMind will recalculate profit, profit margin,
+            cost per kilometre, and risk level automatically.
+        </p>
+
+        <!-- 编辑 trip 表单 -->
+        <form method="POST" action="/edit-trip/{{ trip['trip_id'] }}">
+            <label>Trip ID</label>
+            <input type="text" name="trip_id" value="{{ trip['trip_id'] }}" readonly>
+
+            <label>Truck ID</label>
+            <input type="text" name="truck_id" value="{{ trip['truck_id'] }}" required>
+
+            <label>Driver</label>
+            <input type="text" name="driver" value="{{ trip['driver'] }}" required>
+
+            <label>Route</label>
+            <input type="text" name="route" value="{{ trip['route'] }}" required>
+
+            <label>Distance (km)</label>
+            <input type="number" name="distance" step="0.1" value="{{ trip['distance'] }}" required>
+
+            <label>Revenue ($)</label>
+            <input type="number" name="revenue" step="0.01" value="{{ trip['revenue'] }}" required>
+
+            <label>Total Cost ($)</label>
+            <input type="number" name="total_cost" step="0.01" value="{{ trip['total_cost'] }}" required>
+
+            <label>Delay Hours</label>
+            <input type="number" name="delay_hours" step="0.1" value="{{ trip['delay_hours'] }}" required>
+
+            <label>Trip Date</label>
+            <input type="date" name="trip_date" value="{{ trip['trip_date'] }}" required>
+
+            <!-- 保存修改 -->
+            <button type="submit" class="button">Save Changes</button>
+        </form>
+
+        <!-- 页面导航按钮 -->
+        <div class="button-group">
+            <a href="/trips" class="button">Back to Trip Records</a>
+            <a href="/route-analytics" class="button">View Route Analytics</a>
+            <a href="/" class="button">Back to Home</a>
+        </div>
+    </div>
+</body>
+</html>

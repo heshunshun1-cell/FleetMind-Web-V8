@@ -2,7 +2,7 @@
 # Flask：用来创建网页应用
 # render_template：用来显示 HTML 页面
 # request：用来接收网页表单提交的数据
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect
 from database import (
     read_trucks_from_db,
     get_dashboard_data_from_db,
@@ -16,7 +16,17 @@ from database import (
     save_truck_to_db,
     read_trips_from_db,
     get_trip_summary_from_db,
-    generate_trip_insights_from_db
+    generate_trip_insights_from_db,
+    get_route_analytics_from_db,
+    generate_route_insights_from_db,
+    get_route_summary_from_db,
+    save_trip_to_db,
+    get_trip_by_id_from_db,
+    update_trip_in_db,
+    delete_trip_from_db,
+    get_truck_by_id_from_db,
+    update_truck_in_db,
+    delete_truck_from_db
 )
 
 # 从我们自己写的 fleetmind_core.py 中导入核心功能
@@ -215,6 +225,48 @@ def records():
 # 读取 fleet_data.csv
 # 把 records 传给 records.html
 
+@app.route("/edit-truck/<truck_id>", methods=["GET", "POST"])
+def edit_truck(truck_id):
+    # 根据 truck_id 读取当前 truck 数据
+    truck = get_truck_by_id_from_db(truck_id)
+
+    # 如果找不到这辆车，返回 Truck Records 页面
+    if truck is None:
+        return redirect("/records")
+
+    # 如果用户提交了修改表单
+    if request.method == "POST":
+        truck_data = {
+            "driver": request.form["driver"],
+            "route": request.form["route"],
+            "revenue": request.form["revenue"],
+            "fuel_cost": request.form["fuel_cost"],
+            "toll_cost": request.form["toll_cost"],
+            "repair_cost": request.form["repair_cost"],
+            "salary_cost": request.form["salary_cost"],
+            "insurance_cost": request.form["insurance_cost"],
+            "other_cost": request.form["other_cost"]
+        }
+
+        # 更新 truck 数据
+        update_truck_in_db(truck_id, truck_data)
+
+        # 修改后返回 Truck Records 页面
+        return redirect("/records")
+
+    # 如果只是打开页面，显示编辑表单
+    return render_template("edit_truck.html", truck=truck)
+
+
+@app.route("/delete-truck/<truck_id>")
+def delete_truck(truck_id):
+    # 根据 truck_id 删除 truck
+    delete_truck_from_db(truck_id)
+
+    # 删除后返回 Truck Records 页面
+    return redirect("/records")
+
+
 # dashboard页面
 @app.route("/dashboard")
 def dashboard():
@@ -271,6 +323,95 @@ def trips():
         summary=summary,
         trip_insights=trip_insights
         )
+
+@app.route("/add-trip", methods=["GET", "POST"])
+def add_trip():
+    # 如果用户提交了表单
+    if request.method == "POST":
+        trip_data = {
+            "trip_id": request.form["trip_id"],
+            "truck_id": request.form["truck_id"],
+            "driver": request.form["driver"],
+            "route": request.form["route"],
+            "distance": request.form["distance"],
+            "revenue": request.form["revenue"],
+            "total_cost": request.form["total_cost"],
+            "delay_hours": request.form["delay_hours"],
+            "trip_date": request.form["trip_date"]
+        }
+
+        # 保存新 trip 到 SQLite 数据库
+        save_trip_to_db(trip_data)
+
+        # 保存后跳转到 Trip Records 页面查看结果
+        return redirect("/trips")
+
+    # 从数据库读取已有 truck records
+    trucks = read_trucks_from_db()
+
+    # 把 trucks 传给 add_trip.html，用来生成 Truck ID 下拉菜单
+    return render_template("add_trip.html", trucks=trucks)
+
+@app.route("/edit-trip/<trip_id>", methods=["GET", "POST"])
+def edit_trip(trip_id):
+    # 根据 trip_id 读取当前 trip 数据
+    trip = get_trip_by_id_from_db(trip_id)
+
+    # 如果找不到这条 trip，返回 Trip Records 页面
+    if trip is None:
+        return redirect("/trips")
+
+    # 如果用户提交了修改表单
+    if request.method == "POST":
+        trip_data = {
+            "truck_id": request.form["truck_id"],
+            "driver": request.form["driver"],
+            "route": request.form["route"],
+            "distance": request.form["distance"],
+            "revenue": request.form["revenue"],
+            "total_cost": request.form["total_cost"],
+            "delay_hours": request.form["delay_hours"],
+            "trip_date": request.form["trip_date"]
+        }
+
+        # 更新 trip 数据
+        update_trip_in_db(trip_id, trip_data)
+
+        # 修改后返回 Trip Records 页面
+        return redirect("/trips")
+
+    # 如果只是打开页面，显示编辑表单
+    return render_template("edit_trip.html", trip=trip)
+
+
+@app.route("/delete-trip/<trip_id>")
+def delete_trip(trip_id):
+    # 根据 trip_id 删除 trip
+    delete_trip_from_db(trip_id)
+
+    # 删除后返回 Trip Records 页面
+    return redirect("/trips")
+
+@app.route("/route-analytics")
+def route_analytics():
+    # 从 SQLite 数据库获取路线分析数据
+    routes = get_route_analytics_from_db()
+
+    # 获取路线 summary cards 数据
+    route_summary = get_route_summary_from_db()
+
+    # 根据路线数据生成运营建议
+    route_insights = generate_route_insights_from_db()
+
+    # 把路线分析数据和建议传给 HTML 页面
+    return render_template(
+        "route_analytics.html",
+        routes=routes,
+        route_summary=route_summary,
+        route_insights=route_insights
+    )
+
+
 
 
 # 程序入口

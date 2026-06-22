@@ -553,6 +553,134 @@ def save_truck_to_db(truck):
         return False
     
 
+def get_truck_by_id_from_db(truck_id):
+    """根据 truck_id 读取一条 truck 记录"""
+
+    # 连接数据库
+    conn = get_db_connection()
+
+    # 查询指定 truck
+    truck = conn.execute(
+        "SELECT * FROM trucks WHERE truck_id = ?",
+        (truck_id,)
+    ).fetchone()
+
+    # 关闭数据库
+    conn.close()
+
+    return truck
+
+
+def update_truck_in_db(truck_id, truck_data):
+    """更新一条已有的 truck record"""
+
+    # 读取表单数据
+    driver = truck_data["driver"]
+    route = truck_data["route"]
+    revenue = float(truck_data["revenue"])
+    fuel_cost = float(truck_data["fuel_cost"])
+    toll_cost = float(truck_data["toll_cost"])
+    repair_cost = float(truck_data["repair_cost"])
+    salary_cost = float(truck_data["salary_cost"])
+    insurance_cost = float(truck_data["insurance_cost"])
+    other_cost = float(truck_data["other_cost"])
+
+    # 自动计算总成本、利润、利润率
+    total_cost = fuel_cost + toll_cost + repair_cost + salary_cost + insurance_cost + other_cost
+    profit = revenue - total_cost
+
+    if revenue > 0:
+        profit_margin = (profit / revenue) * 100
+    else:
+        profit_margin = 0
+
+    # 找出最高成本类别
+    costs = {
+        "Fuel Cost": fuel_cost,
+        "Toll Cost": toll_cost,
+        "Repair Cost": repair_cost,
+        "Salary Cost": salary_cost,
+        "Insurance Cost": insurance_cost,
+        "Other Cost": other_cost
+    }
+
+    highest_cost_category = max(costs, key=costs.get)
+    highest_cost_value = costs[highest_cost_category]
+
+    # 判断风险等级
+    if profit < 0:
+        risk_level = "High Risk"
+    elif profit_margin < 10:
+        risk_level = "Warning"
+    elif profit_margin >= 25:
+        risk_level = "Excellent"
+    else:
+        risk_level = "Normal"
+
+    # 连接数据库
+    conn = get_db_connection()
+
+    # 更新 truck 数据
+    conn.execute("""
+        UPDATE trucks
+        SET
+            driver = ?,
+            route = ?,
+            revenue = ?,
+            fuel_cost = ?,
+            toll_cost = ?,
+            repair_cost = ?,
+            salary_cost = ?,
+            insurance_cost = ?,
+            other_cost = ?,
+            total_cost = ?,
+            profit = ?,
+            profit_margin = ?,
+            risk_level = ?,
+            highest_cost_category = ?,
+            highest_cost_value = ?
+        WHERE truck_id = ?
+    """, (
+        driver,
+        route,
+        revenue,
+        fuel_cost,
+        toll_cost,
+        repair_cost,
+        salary_cost,
+        insurance_cost,
+        other_cost,
+        total_cost,
+        profit,
+        profit_margin,
+        risk_level,
+        highest_cost_category,
+        highest_cost_value,
+        truck_id
+    ))
+
+    # 保存修改并关闭数据库
+    conn.commit()
+    conn.close()
+
+
+def delete_truck_from_db(truck_id):
+    """根据 truck_id 删除一条 truck record"""
+
+    # 连接数据库
+    conn = get_db_connection()
+
+    # 删除指定 truck
+    conn.execute(
+        "DELETE FROM trucks WHERE truck_id = ?",
+        (truck_id,)
+    )
+
+    # 保存修改并关闭数据库
+    conn.commit()
+    conn.close()
+    
+
 def read_trips_from_db():
     """从 SQLite 数据库读取所有运输任务记录"""
 
@@ -570,6 +698,209 @@ def read_trips_from_db():
     conn.close()
 
     return trips
+
+
+def save_trip_to_db(trip_data):
+    """保存一条新的 trip record 到 SQLite 数据库"""
+
+    # 读取用户输入的数据
+    trip_id = trip_data["trip_id"]
+    truck_id = trip_data["truck_id"]
+    driver = trip_data["driver"]
+    route = trip_data["route"]
+    distance = float(trip_data["distance"])
+    revenue = float(trip_data["revenue"])
+    total_cost = float(trip_data["total_cost"])
+    delay_hours = float(trip_data["delay_hours"])
+    trip_date = trip_data["trip_date"]
+
+    # 自动计算利润
+    profit = revenue - total_cost
+
+    # 自动计算利润率
+    if revenue > 0:
+        profit_margin = (profit / revenue) * 100
+    else:
+        profit_margin = 0
+
+    # 自动计算每公里成本
+    if distance > 0:
+        cost_per_km = total_cost / distance
+    else:
+        cost_per_km = 0
+
+    # 根据利润率和延误时间判断风险等级
+    if profit < 0 or delay_hours >= 24:
+        risk_level = "High Risk"
+    elif profit_margin < 10 or delay_hours >= 12:
+        risk_level = "Warning"
+    elif profit_margin >= 25 and delay_hours < 6:
+        risk_level = "Excellent"
+    else:
+        risk_level = "Normal"
+
+    # 连接数据库
+    conn = get_db_connection()
+
+    # 把新 trip 保存进 trips 表
+    conn.execute("""
+        INSERT INTO trips (
+            trip_id,
+            truck_id,
+            driver,
+            route,
+            distance,
+            revenue,
+            total_cost,
+            profit,
+            profit_margin,
+            cost_per_km,
+            delay_hours,
+            risk_level,
+            trip_date
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, (
+        trip_id,
+        truck_id,
+        driver,
+        route,
+        distance,
+        revenue,
+        total_cost,
+        profit,
+        profit_margin,
+        cost_per_km,
+        delay_hours,
+        risk_level,
+        trip_date
+    ))
+
+    # 保存修改
+    conn.commit()
+
+    # 关闭数据库
+    conn.close()
+
+
+def get_trip_by_id_from_db(trip_id):
+    """根据 trip_id 读取一条 trip 记录"""
+
+    # 连接数据库
+    conn = get_db_connection()
+
+    # 根据 trip_id 查询对应 trip
+    trip = conn.execute(
+        "SELECT * FROM trips WHERE trip_id = ?",
+        (trip_id,)
+    ).fetchone()
+
+    # 关闭数据库
+    conn.close()
+
+    # 返回查询结果
+    return trip
+
+
+def update_trip_in_db(trip_id, trip_data):
+    """更新一条已有的 trip record"""
+
+    # 读取表单数据
+    truck_id = trip_data["truck_id"]
+    driver = trip_data["driver"]
+    route = trip_data["route"]
+    distance = float(trip_data["distance"])
+    revenue = float(trip_data["revenue"])
+    total_cost = float(trip_data["total_cost"])
+    delay_hours = float(trip_data["delay_hours"])
+    trip_date = trip_data["trip_date"]
+
+    # 自动重新计算利润
+    profit = revenue - total_cost
+
+    # 自动重新计算利润率
+    if revenue > 0:
+        profit_margin = (profit / revenue) * 100
+    else:
+        profit_margin = 0
+
+    # 自动重新计算每公里成本
+    if distance > 0:
+        cost_per_km = total_cost / distance
+    else:
+        cost_per_km = 0
+
+    # 根据最新规则重新判断风险等级
+    if profit < 0 or delay_hours >= 24:
+        risk_level = "High Risk"
+    elif profit_margin < 10 or delay_hours >= 12:
+        risk_level = "Warning"
+    elif profit_margin >= 25 and delay_hours < 6:
+        risk_level = "Excellent"
+    else:
+        risk_level = "Normal"
+
+    # 连接数据库
+    conn = get_db_connection()
+
+    # 更新 trip 数据
+    conn.execute("""
+        UPDATE trips
+        SET
+            truck_id = ?,
+            driver = ?,
+            route = ?,
+            distance = ?,
+            revenue = ?,
+            total_cost = ?,
+            profit = ?,
+            profit_margin = ?,
+            cost_per_km = ?,
+            delay_hours = ?,
+            risk_level = ?,
+            trip_date = ?
+        WHERE trip_id = ?
+    """, (
+        truck_id,
+        driver,
+        route,
+        distance,
+        revenue,
+        total_cost,
+        profit,
+        profit_margin,
+        cost_per_km,
+        delay_hours,
+        risk_level,
+        trip_date,
+        trip_id
+    ))
+
+    # 保存修改
+    conn.commit()
+
+    # 关闭数据库
+    conn.close()
+
+
+def delete_trip_from_db(trip_id):
+    """根据 trip_id 删除一条 trip record"""
+
+    # 连接数据库
+    conn = get_db_connection()
+
+    # 删除指定 trip
+    conn.execute(
+        "DELETE FROM trips WHERE trip_id = ?",
+        (trip_id,)
+    )
+
+    # 保存修改
+    conn.commit()
+
+    # 关闭数据库
+    conn.close()
+
 
 def get_trip_summary_from_db():
     """从 SQLite 数据库计算 trip summary 数据"""
@@ -716,3 +1047,154 @@ def generate_trip_insights_from_db():
     return insights
 
 
+def get_route_analytics_from_db():
+    """从 trips 表生成路线层面的分析数据"""
+
+    # 连接 SQLite 数据库
+    conn = get_db_connection()
+
+    # 按 route 分组，统计每条路线的收入、成本、利润、延误等数据
+    rows = conn.execute("""
+        SELECT
+            route,
+            COUNT(*) AS total_trips,
+            SUM(revenue) AS total_revenue,
+            SUM(total_cost) AS total_cost,
+            SUM(profit) AS total_profit,
+            AVG(profit_margin) AS average_profit_margin,
+            AVG(delay_hours) AS average_delay_hours,
+            AVG(cost_per_km) AS average_cost_per_km
+        FROM trips
+        GROUP BY route
+        ORDER BY total_profit DESC
+    """).fetchall()
+
+    # 关闭数据库连接
+    conn.close()
+
+    # 用来存放每条路线的分析结果
+    route_analytics = []
+
+    # 遍历每条路线的统计结果
+    for row in rows:
+        average_profit_margin = float(row["average_profit_margin"])
+        average_delay_hours = float(row["average_delay_hours"])
+        average_cost_per_km = float(row["average_cost_per_km"])
+
+        # 根据利润率和延误时间判断路线风险等级
+        if average_profit_margin < 0 or average_delay_hours >= 24:
+            risk_level = "High Risk"
+        elif average_profit_margin < 10 or average_delay_hours >= 12:
+            risk_level = "Warning"
+        elif average_profit_margin >= 25 and average_delay_hours < 6:
+            risk_level = "Excellent"
+        else:
+            risk_level = "Normal"
+
+        # 把这条路线的分析结果加入列表
+        route_analytics.append({
+            "route": row["route"],
+            "total_trips": row["total_trips"],
+            "total_revenue": float(row["total_revenue"]),
+            "total_cost": float(row["total_cost"]),
+            "total_profit": float(row["total_profit"]),
+            "average_profit_margin": average_profit_margin,
+            "average_delay_hours": average_delay_hours,
+            "average_cost_per_km": average_cost_per_km,
+            "risk_level": risk_level
+        })
+
+    # 返回所有路线的分析结果
+    return route_analytics
+
+
+def get_route_summary_from_db():
+    """生成路线分析页面顶部的 summary cards 数据"""
+
+    # 获取所有路线分析结果
+    routes = get_route_analytics_from_db()
+
+    # 如果没有路线数据
+    if len(routes) == 0:
+        return {
+            "total_routes": 0,
+            "best_route": "N/A",
+            "highest_delay_route": "N/A",
+            "high_risk_routes": 0
+        }
+
+    # 找出利润最高的路线
+    best_route = max(routes, key=lambda route: route["total_profit"])
+
+    # 找出平均延误最高的路线
+    highest_delay_route = max(routes, key=lambda route: route["average_delay_hours"])
+
+    # 统计 High Risk 路线数量
+    high_risk_routes = 0
+
+    for route in routes:
+        if route["risk_level"] == "High Risk":
+            high_risk_routes += 1
+
+    # 返回 summary cards 需要的数据
+    return {
+        "total_routes": len(routes),
+        "best_route": best_route["route"],
+        "highest_delay_route": highest_delay_route["route"],
+        "high_risk_routes": high_risk_routes
+    }
+
+
+
+def generate_route_insights_from_db():
+    """根据路线分析数据生成路线层面的运营建议"""
+
+    # 先获取路线分析数据
+    routes = get_route_analytics_from_db()
+
+    # 用来存放路线建议
+    insights = []
+
+    # 如果没有路线数据
+    if len(routes) == 0:
+        insights.append("No route records found in the database.")
+        return insights
+
+    # 找出利润最高的路线
+    highest_profit_route = max(routes, key=lambda route: route["total_profit"])
+
+    # 找出平均利润率最低的路线
+    lowest_margin_route = min(routes, key=lambda route: route["average_profit_margin"])
+
+    # 找出平均延误最高的路线
+    highest_delay_route = max(routes, key=lambda route: route["average_delay_hours"])
+
+    # 找出平均每公里成本最高的路线
+    highest_cost_route = max(routes, key=lambda route: route["average_cost_per_km"])
+
+    # 生成路线建议
+    insights.append(
+        f"{highest_profit_route['route']} is the most profitable route with a total profit of ${highest_profit_route['total_profit']:,.2f}."
+    )
+
+    insights.append(
+        f"{lowest_margin_route['route']} has the lowest average profit margin at {lowest_margin_route['average_profit_margin']:.2f}%."
+    )
+
+    insights.append(
+        f"{highest_delay_route['route']} has the highest average delay at {highest_delay_route['average_delay_hours']:.1f} hours."
+    )
+
+    insights.append(
+        f"{highest_cost_route['route']} has the highest average cost per kilometre at ${highest_cost_route['average_cost_per_km']:.2f}/km."
+    )
+
+    # 单独提示 High Risk 路线
+    for route in routes:
+        if route["risk_level"] == "High Risk":
+            insights.append(
+                f"{route['route']} is marked as High Risk and should be reviewed by management."
+            )
+
+    # 返回所有路线建议
+    return insights

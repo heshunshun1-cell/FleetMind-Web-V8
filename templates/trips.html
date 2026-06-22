@@ -14,7 +14,7 @@
             <strong>FleetMind SQLite database</strong>.
         </p>
 
-        <!-- Trip Summary Cards -->
+        <!-- Trip 汇总卡片 -->
         <div class="summary-grid">
             <div class="card">
                 <h3>Total Trips</h3>
@@ -51,7 +51,7 @@
             </div>
         </div>
 
-        <!-- Trip Records Table -->
+        <!-- Trip Records 表格 -->
         {% if trips %}
             <table>
                 <thead>
@@ -69,6 +69,7 @@
                         <th>Delay Hours</th>
                         <th>Risk Level</th>
                         <th>Date</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
 
@@ -104,6 +105,15 @@
                         {% endif %}
 
                         <td>{{ trip["trip_date"] }}</td>
+
+                        <!-- 修改或删除 trip -->
+                        <td>
+                            <a href="/edit-trip/{{ trip['trip_id'] }}" class="button">Edit</a>
+                            <a href="/delete-trip/{{ trip['trip_id'] }}" class="button"
+                               onclick="return confirm('Are you sure you want to delete this trip?');">
+                               Delete
+                            </a>
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -112,7 +122,7 @@
             <p>No trip records found.</p>
         {% endif %}
 
-        <!-- Trip-Level Insights -->
+        <!-- Trip 运营建议 -->
         <div class="insight-summary-box">
             <h2>Trip-Level Insights</h2>
             <p>
@@ -136,10 +146,12 @@
             <p>No trip insights available.</p>
         {% endif %}
 
-        <!-- Navigation Buttons -->
+        <!-- 页面导航按钮 -->
         <div class="button-group">
             <a href="/" class="button">Back to Home</a>
             <a href="/records" class="button">View Truck Records</a>
+            <a href="/add-trip" class="button">Add New Trip</a>
+            <a href="/route-analytics" class="button">View Route Analytics</a>
             <a href="/dashboard" class="button">View Dashboard</a>
             <a href="/analytics" class="button">View Analytics</a>
             <a href="/insights" class="button">View Insights</a>

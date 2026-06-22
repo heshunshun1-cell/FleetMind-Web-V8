@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>FleetMind Route Analytics</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <div class="container">
+        <h1>FleetMind Route Analytics</h1>
+
+        <p class="description">
+            This page analyzes route-level performance based on trip records stored in the SQLite database.
+        </p>
+
+        <!-- 路线汇总卡片 -->
+        <div class="summary-grid">
+            <div class="card">
+                <h3>Total Routes</h3>
+                <p>{{ route_summary.total_routes }}</p>
+            </div>
+
+            <div class="card">
+                <h3>Best Route</h3>
+                <p>{{ route_summary.best_route }}</p>
+            </div>
+
+            <div class="card">
+                <h3>Highest Delay Route</h3>
+                <p>{{ route_summary.highest_delay_route }}</p>
+            </div>
+
+            <div class="card">
+                <h3>High Risk Routes</h3>
+                <p>{{ route_summary.high_risk_routes }}</p>
+            </div>
+        </div>
+
+        <!-- 路线分析表格 -->
+        {% if routes %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Route</th>
+                        <th>Total Trips</th>
+                        <th>Total Revenue</th>
+                        <th>Total Cost</th>
+                        <th>Total Profit</th>
+                        <th>Average Profit Margin</th>
+                        <th>Average Delay</th>
+                        <th>Average Cost / KM</th>
+                        <th>Risk Level</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for route in routes %}
+                    <tr>
+                        <td>{{ route["route"] }}</td>
+                        <td>{{ route["total_trips"] }}</td>
+                        <td>${{ "{:,.2f}".format(route["total_revenue"]) }}</td>
+                        <td>${{ "{:,.2f}".format(route["total_cost"]) }}</td>
+
+                        {% if route["total_profit"] >= 0 %}
+                            <td class="profit-positive">${{ "{:,.2f}".format(route["total_profit"]) }}</td>
+                        {% else %}
+                            <td class="profit-negative">${{ "{:,.2f}".format(route["total_profit"]) }}</td>
+                        {% endif %}
+
+                        <td>{{ "%.2f"|format(route["average_profit_margin"]) }}%</td>
+                        <td>{{ "%.1f"|format(route["average_delay_hours"]) }} h</td>
+                        <td>${{ "%.2f"|format(route["average_cost_per_km"]) }}</td>
+
+                        {% if route["risk_level"] == "Excellent" %}
+                            <td class="risk-excellent">{{ route["risk_level"] }}</td>
+                        {% elif route["risk_level"] == "Normal" %}
+                            <td class="risk-normal">{{ route["risk_level"] }}</td>
+                        {% elif route["risk_level"] == "Warning" %}
+                            <td class="risk-warning">{{ route["risk_level"] }}</td>
+                        {% else %}
+                            <td class="risk-high">{{ route["risk_level"] }}</td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No route analytics found.</p>
+        {% endif %}
+
+        <!-- 路线运营建议 -->
+        <div class="insight-summary-box">
+            <h2>Route-Level Insights</h2>
+            <p>
+                FleetMind reviews route profit, delay, cost per kilometre, and risk level
+                to identify routes that may need management attention.
+            </p>
+        </div>
+
+        {% if route_insights %}
+            <div class="insight-list">
+                {% for insight in route_insights %}
+                    <div class="insight-card">
+                        <div class="insight-header">
+                            Route Insight {{ loop.index }}
+                        </div>
+                        <p>{{ insight }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>No route insights available.</p>
+        {% endif %}
+
+        <!-- 页面导航按钮 -->
+        <div class="button-group">
+            <a href="/" class="button">Back to Home</a>
+            <a href="/records" class="button">View Truck Records</a>
+            <a href="/trips" class="button">View Trip Records</a>
+            <a href="/dashboard" class="button">View Dashboard</a>
+            <a href="/analytics" class="button">View Analytics</a>
+            <a href="/insights" class="button">View Operational Insights</a>
+        </div>
+    </div>
+</body>
+</html>
