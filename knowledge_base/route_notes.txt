@@ -1,0 +1,36 @@
+FleetMind Route Notes
+
+# 中文说明：这个文件保存不同路线的运营特点，用来帮助 RAG assistant 回答路线相关问题。
+
+Chongqing-Guangzhou route often has higher fuel cost and toll pressure.
+# 中文解释：重庆到广州路线通常燃油成本和过路费压力更高。
+
+Chongqing-Shenzhen route usually has strong revenue, but long-distance fuel cost should be monitored.
+# 中文解释：重庆到深圳路线收入通常较强，但长距离运输的燃油成本需要重点关注。
+
+Chongqing-Chengdu route is shorter and more stable, but profit depends heavily on cost control.
+# 中文解释：重庆到成都路线较短且较稳定，但利润主要取决于成本控制。
+
+Chongqing-Shanghai route has high revenue potential, but delays and repair cost should be watched carefully.
+# 中文解释：重庆到上海路线收入潜力较高，但需要关注延误和维修成本。
+
+Chongqing-Beijing route may have strong business demand, but long distance can increase fuel cost and driver scheduling pressure.
+# 中文解释：重庆到北京路线可能有较强商务需求，但长距离会增加燃油成本和司机排班压力。
+
+Chongqing-Wuhan route can be useful for central China distribution, but route profit should be compared with fuel and toll cost.
+# 中文解释：重庆到武汉路线适合华中分拨，但路线利润需要和燃油、过路费成本一起比较。
+
+Chongqing-Kunming route may face mountain road conditions, so delay risk and fuel efficiency should be monitored.
+# 中文解释：重庆到昆明路线可能面对山路路况，因此需要关注延误风险和燃油效率。
+
+International project routes may involve customs clearance, port coordination, and multimodal transport planning.
+# 中文解释：国际项目路线可能涉及清关、港口协调和多式联运规划。
+
+Routes with repeated delays may need better scheduling, loading time control, or driver planning.
+# 中文解释：如果某条路线反复延误，可能需要优化排班、装货时间或司机安排。
+
+Routes with high revenue but low profit margin should be reviewed for hidden operating costs.
+# 中文解释：如果某条路线收入高但利润率低，应该检查隐藏运营成本。
+
+Routes with stable demand and strong profit margin can be used as benchmark routes.
+# 中文解释：需求稳定且利润率强的路线可以作为标杆路线。

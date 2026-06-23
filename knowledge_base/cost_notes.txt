@@ -1,0 +1,51 @@
+FleetMind Cost Notes
+
+# 中文说明：这个文件保存车队运营成本相关知识，用来帮助 RAG assistant 回答成本分析问题。
+
+Fuel cost is usually one of the largest operating costs in long-distance trucking.
+# 中文解释：燃油成本通常是长距离货运中最大的运营成本之一。
+
+Fuel cost should be compared with route distance, vehicle fuel efficiency, load weight, and driving behaviour.
+# 中文解释：燃油成本应该结合路线距离、车辆燃油效率、载重和驾驶行为一起分析。
+
+Toll cost should be reviewed when a route uses many highways or expressways.
+# 中文解释：当路线大量使用高速公路或收费道路时，应该关注过路费成本。
+
+High toll cost may reduce profit margin even when revenue looks strong.
+# 中文解释：即使收入看起来较强，较高的过路费也可能降低利润率。
+
+Repair cost may indicate vehicle condition problems if it increases repeatedly.
+# 中文解释：如果维修成本反复上升，可能说明车辆状态存在问题。
+
+Maintenance cost should be monitored before assigning trucks to long-distance routes.
+# 中文解释：在安排车辆执行长途路线前，应该关注保养成本。
+
+Preventive maintenance can reduce unexpected breakdowns, delay risk, and emergency repair cost.
+# 中文解释：预防性保养可以减少突发故障、延误风险和紧急维修成本。
+
+Cost per kilometre helps compare routes with different distances.
+# 中文解释：每公里成本可以帮助比较不同距离的路线。
+
+A high cost per kilometre may indicate fuel inefficiency, toll pressure, repair problems, or low vehicle utilization.
+# 中文解释：较高的每公里成本可能说明燃油效率低、过路费压力大、维修问题或车辆利用率低。
+
+If cost per kilometre is rising while revenue stays stable, the route may need cost control.
+# 中文解释：如果每公里成本上升但收入保持稳定，该路线可能需要加强成本控制。
+
+Salary cost should be reviewed together with trip distance, driver schedule, overtime, and workload.
+# 中文解释：司机薪资成本应该和运输距离、司机排班、加班情况以及工作量一起分析。
+
+Insurance cost is usually stable, but it still affects long-term fleet profitability.
+# 中文解释：保险成本通常较稳定，但仍会影响车队长期盈利能力。
+
+Other cost should be checked carefully because it may hide unclassified operating expenses.
+# 中文解释：其他成本应该仔细检查，因为它可能隐藏未分类的运营支出。
+
+When total cost grows faster than revenue, profit margin will decrease.
+# 中文解释：当总成本增长快于收入时，利润率会下降。
+
+A profitable truck can still need review if one cost category grows too quickly.
+# 中文解释：即使一辆车整体盈利，如果某一类成本增长过快，也仍然需要复查。
+
+Cost analysis should compare revenue, total cost, profit, profit margin, and cost per kilometre together.
+# 中文解释：成本分析应该同时比较收入、总成本、利润、利润率和每公里成本。

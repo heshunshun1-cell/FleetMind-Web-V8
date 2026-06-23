@@ -5,3 +5,4 @@ __pycache__/
 venv/
 .venv/
 fleet_history.txt
+fleetmind.db

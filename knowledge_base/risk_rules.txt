@@ -1,0 +1,36 @@
+FleetMind Risk Rules
+
+# 中文说明：这个文件保存 FleetMind 的风险判断规则，用来帮助 RAG assistant 回答风险相关问题。
+
+If a truck or trip has negative profit, it should be considered High Risk.
+# 中文解释：如果一辆车或一趟运输任务利润为负数，就应该被认为是高风险。
+
+If the profit margin is below 10 percent, it should be considered Warning.
+# 中文解释：如果利润率低于 10%，就应该被认为是预警状态。
+
+If the profit margin is 25 percent or higher and delay is low, it can be considered Excellent.
+# 中文解释：如果利润率达到 25% 或更高，并且延误较低，就可以认为表现优秀。
+
+If a trip has delay hours greater than or equal to 24, it should be reviewed by management.
+# 中文解释：如果一趟运输任务延误时间大于或等于 24 小时，管理层应该重点复查。
+
+If a route repeatedly has high delay, it may indicate scheduling, loading, or driver planning problems.
+# 中文解释：如果一条路线反复出现高延误，可能说明排班、装货或司机安排存在问题。
+
+If cost per kilometre is unusually high, the route or truck should be reviewed for fuel cost, toll cost, and maintenance cost.
+# 中文解释：如果每公里成本异常偏高，应该检查该路线或车辆的燃油成本、过路费和维修成本。
+
+If fuel cost is the largest cost category, the company should review fuel efficiency, route distance, and driving behaviour.
+# 中文解释：如果燃油成本是最大的成本类别，公司应该检查燃油效率、路线距离和驾驶行为。
+
+If repair or maintenance cost is unusually high, the truck may need mechanical inspection before more long-distance trips.
+# 中文解释：如果维修或保养成本异常偏高，车辆在继续长途运输前可能需要机械检查。
+
+If the same truck produces repeated loss-making trips, it should be marked for priority operational review.
+# 中文解释：如果同一辆车反复产生亏损运输任务，它应该被标记为优先运营复查对象。
+
+If revenue is high but profit margin is low, the company should check whether operating costs are too high.
+# 中文解释：如果收入很高但利润率很低，公司应该检查运营成本是否过高。
+
+High Risk records should be checked first because they may reduce fleet profitability.
+# 中文解释：高风险记录应该优先检查，因为它们可能降低整个车队的盈利能力。

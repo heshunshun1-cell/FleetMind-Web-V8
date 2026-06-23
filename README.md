@@ -1,374 +1,361 @@
-# FleetMind Web V5
+# FleetMind Web V6
 
 ## 项目简介
 
-FleetMind Web V5 是一个基于 Flask 和 SQLite 的物流车队运营分析系统。
+FleetMind 是我从 Python 基础项目一步步升级出来的物流车队运营分析系统。
 
-这个项目最早来自我之前的 Python 车辆成本分析程序，后来一步步升级成 Flask 网页版、CSV Dashboard，再到现在的数据库驱动版本。V5 的目标是把 FleetMind 从一个简单的数据展示网页，升级成一个可以保存、管理、分析 truck 和 trip 数据的小型物流运营系统。
+前几个版本主要完成了车辆成本分析、Flask 网页、CSV 记录、Dashboard 可视化、SQLite 数据库、Trip records 和 Route analytics。到了 V6，我开始尝试加入 RAG 思想，让 FleetMind 不只是展示数据，也可以根据自己的知识库回答一些车队运营问题。
 
-V5 的核心变化是：
+V6 的核心定位是：
+
+> FleetMind V6 - RAG-based Fleet Operations Assistant  
+> 基于 RAG 的车队运营问答助手
+
+目前这个版本还没有接入真正的大模型 API，而是一个我自己手写的 simple rule-based RAG prototype。重点是理解 RAG 的底层流程。
+
+---
+
+## 从 V1 到 V6 的升级
+
+| 版本 | 主要内容 |
+|---|---|
+| V1 | Python 命令行车辆成本分析 |
+| V2 | Flask 网页版，可以输入车辆数据 |
+| V3 | 加入 CSV records，保存和查看历史车辆记录 |
+| V4 | 加入 Dashboard 和图表分析 |
+| V5 | 升级 SQLite 数据库，加入 trucks、trips、route analytics 和 insights |
+| V6 | 加入 knowledge base 和 simple RAG assistant，支持运营问答 |
+
+---
+
+## 为什么做 V6
+
+V5 已经可以分析车辆和运输任务数据，也能生成一些 rule-based insights。
+
+但是 V5 的建议是固定规则生成的，用户不能自由提问。
+
+例如，V5 可以显示：
 
 ```text
-CSV Dashboard
-→ SQLite Database
-→ Truck / Trip / Route Analytics
-→ CRUD Data Management
+This trip is High Risk.
 ````
 
-简单来说，FleetMind V5 不只是看数据，还可以新增、修改、删除数据，并且让 dashboard、analytics 和 insights 自动更新。
-
----
-
-## 项目背景
-
-我想做这个项目，是因为我对物流业务和数据分析都比较感兴趣。真实的物流公司不只关心一辆车赚不赚钱，还会关心每一趟运输任务的利润、延误、路线表现和风险。
-
-所以 V5 主要围绕三个层级展开：
+但它不能很好回答：
 
 ```text
-Truck-level analysis：车辆层面
-Trip-level analysis：运输任务层面
-Route-level analysis：路线层面
+为什么 high delay trip 需要复查？
+fuel cost 太高时应该检查什么？
+Chongqing-Kunming route 有什么特点？
+cost per kilometre 为什么重要？
 ```
 
-这样项目会更接近真实物流运营场景。
+所以 V6 的目标是：
+
+> 让 FleetMind 可以根据自己的知识库，回答一些物流运营相关问题。
 
 ---
 
-## 从 V5.1 到最终版 V5
+## 什么是 RAG
 
-### V5.1：SQLite 数据库基础
+RAG 全称是 Retrieval-Augmented Generation。
 
-V5.1 的重点是把项目从 CSV 文件升级到 SQLite 数据库。
-
-我创建了 `fleetmind.db` 和 `trucks` 表，让 truck records 可以真正保存到数据库中。Dashboard、Records、Analytics 和 Insights 也开始从 SQLite 读取数据。
-
-这一步让我理解到：
-一个项目想更像真实系统，不能只靠 CSV 文件，数据库结构非常重要。
-
----
-
-### V5.2：Trip Records
-
-V5.2 加入了 `trips` 表，用来保存每一趟运输任务。
-
-每条 trip 包括 route、distance、revenue、cost、profit、delay、risk level 等信息。系统也新增了 `/trips` 页面、Trip Summary Cards 和 Trip-Level Insights。
-
-这一步让项目从只分析车辆，升级到可以分析具体运输任务。
-
----
-
-### V5.3：Route Analytics
-
-V5.3 在 trip 数据基础上，加入了路线分析页面 `/route-analytics`。
-
-系统会按 route 汇总 trip 数据，计算每条路线的 revenue、profit、average delay、average cost per KM 和 risk level。
-
-这一步让我感觉项目更接近真实物流管理，因为公司经常需要知道哪条路线赚钱、哪条路线延误高、哪条路线风险大。
-
----
-
-### V5.4：Add New Trip
-
-V5.4 加入了 `/add-trip` 页面，用户可以手动新增运输任务。
-
-新增 trip 后，系统会自动计算：
-
-* Profit
-* Profit Margin
-* Cost per KM
-* Risk Level
-
-新增的数据会自动影响：
+我对它的理解是：
 
 ```text
-/trips
-/route-analytics
-Trip Insights
-Route Insights
+先查资料，再组织回答。
 ```
 
-这一步让系统从“展示 sample data”变成了“可以录入新业务数据并自动分析”。
+它主要包括三步：
 
----
+| 部分         | 中文理解 | 在 FleetMind V6 中的作用 |
+| ---------- | ---- | ------------------- |
+| Retrieval  | 检索   | 从知识库中找出和问题相关的内容     |
+| Augmented  | 增强   | 把检索到的内容作为回答依据       |
+| Generation | 生成   | 根据找到的内容组织回答         |
 
-### 最终版 V5：CRUD 数据管理
-
-后来我发现一个重要问题：
-如果 truck 或 trip 数据输入错了，系统不能修改，也不能删除。
-
-所以最终版 V5 补上了基础 CRUD 功能：
-
-| 数据类型     | Create | Read | Update | Delete |
-| -------- | ------ | ---- | ------ | ------ |
-| Truck 数据 | 支持     | 支持   | 支持     | 支持     |
-| Trip 数据  | 支持     | 支持   | 支持     | 支持     |
-
-现在 V5 已经可以完成：
+在 FleetMind V6 中，流程是：
 
 ```text
-新增数据
-查看数据
-修改数据
-删除数据
-自动重新计算分析结果
-```
-
-这样它才真正像一个 database-driven fleet analytics system。
-
----
-
-## 主要功能
-
-FleetMind V5 目前支持：
-
-* Truck 数据管理：新增、查看、修改、删除 truck records
-* Trip 数据管理：新增、查看、修改、删除 trip records
-* Fleet Dashboard：展示车队整体收入、成本、利润、风险等指标
-* Fleet Analytics：用 matplotlib 生成收入、利润、风险、成本压力图表
-* Operational Insights：根据 truck 数据生成运营建议
-* Trip Records：展示每趟运输任务的数据
-* Trip Summary Cards：统计 trip 总数、总收入、总利润、高延误任务等
-* Trip-Level Insights：分析高延误、高成本、低利润率等运输任务
-* Route Analytics：按路线汇总收入、利润、延误、成本和风险
-* Route-Level Insights：找出高风险路线、最高延误路线、最赚钱路线等
-
----
-
-## 遇到的问题和解决方法
-
-### 1. CSV 不适合继续扩展
-
-早期版本主要依赖 `fleet_data.csv`。CSV 对简单展示够用，但当系统有 records、dashboard、analytics、insights 后，就不够灵活。
-
-解决方法：
-我把数据存储升级为 SQLite，并把主要页面的数据来源改成数据库。
-
----
-
-### 2. 修改 sample data 后页面没有变化
-
-我一开始修改了 `init_trips.py`，但网页显示的数据没有变化。
-
-后来发现原因是：
-Python 文件变了，不代表 SQLite 数据库里的旧数据会自动变。
-
-解决方法：
-
-```bash
-python3 init_trips.py
-```
-
-重新初始化 trips 表后，页面才会读取到新数据。
-
----
-
-### 3. 旧 trip 的 risk level 和新规则不一致
-
-有些旧 trip 的 delay_hours 已经超过 24 小时，但 risk level 还是 Normal 或 Excellent。
-
-原因是旧数据是在旧规则下写入数据库的。
-
-解决方法：
-我写了 `fix_trip_risk_levels.py`，重新计算旧 trip 的风险等级。
-
-```bash
-python3 fix_trip_risk_levels.py
+用户问题
+→ 读取 knowledge_base
+→ 切分成 chunks
+→ 检索相关 chunks
+→ 生成回答
+→ 显示 sources
 ```
 
 ---
 
-### 4. 新增 trip 后路线分析要自动更新
+## V6 新增内容
 
-新增 trip 后，不应该只出现在 `/trips`，也应该影响 `/route-analytics`。
+### 1. knowledge_base 知识库
 
-解决方法：
-Route Analytics 不写死数据，而是从 `trips` 表按 route 分组计算。所以新增、修改、删除 trip 后，路线分析会自动更新。
-
----
-
-### 5. 数据输入错了不能修改
-
-一开始系统只能新增和查看数据，不能修改和删除。
-
-解决方法：
-我给 truck 和 trip 都加入了基础 CRUD 功能。现在用户可以在网页里直接 edit 和 delete 数据。
-
----
-
-## Risk Level 规则
-
-Trip risk level 的主要规则是：
+V6 新增了：
 
 ```text
-High Risk:
-profit < 0 或 delay_hours >= 24
-
-Warning:
-profit_margin < 10 或 delay_hours >= 12
-
-Excellent:
-profit_margin >= 25 且 delay_hours < 6
-
-Normal:
-其他情况
+knowledge_base/
 ```
 
-这个规则让系统可以根据业务数据自动判断风险，而不是只展示数字。
+里面包括：
+
+```text
+risk_rules.txt
+route_notes.txt
+fleet_policy.txt
+cost_notes.txt
+```
+
+| 文件                 | 作用                                               |
+| ------------------ | ------------------------------------------------ |
+| `risk_rules.txt`   | 风险判断规则，例如 High Risk、Warning、delay 规则             |
+| `route_notes.txt`  | 路线运营知识，例如重庆到广州、深圳、昆明等路线特点                        |
+| `fleet_policy.txt` | 车队管理政策，例如高风险记录优先复查                               |
+| `cost_notes.txt`   | 成本分析知识，例如 fuel cost、toll cost、cost per kilometre |
+
+这些知识文件采用中英双语形式，方便学习和展示。
 
 ---
 
-## 技术栈
+### 2. rag_engine.py
 
-这个项目使用了：
+V6 新增了：
 
-* Python
-* Flask
-* SQLite
-* SQL
-* HTML
-* CSS
-* Jinja2
-* matplotlib
+```text
+rag_engine.py
+```
 
-我在这个项目中练习了：
+它实现了一个简单 RAG engine。
 
-* Flask routing
-* HTML form
-* SQLite database connection
-* SQL query
-* CRUD operations
-* Dashboard metrics
-* Rule-based insights
-* Data visualization
-* Logistics business analysis
+主要函数：
+
+| 函数                              | 作用                |
+| ------------------------------- | ----------------- |
+| `load_documents()`              | 读取知识库 txt 文件      |
+| `split_documents_into_chunks()` | 把文档切成 chunks      |
+| `normalize_word()`              | 简单处理单复数和标点        |
+| `search_chunks()`               | 检索相关 chunks       |
+| `clean_text()`                  | 清理输出文本            |
+| `generate_answer()`             | 生成回答              |
+| `get_sources()`                 | 提取 sources        |
+| `ask_rag()`                     | 封装完整 RAG pipeline |
+
+---
+
+## 当前 RAG 流程
+
+```text
+question
+    ↓
+load_documents()
+    ↓
+documents
+    ↓
+split_documents_into_chunks()
+    ↓
+chunks
+    ↓
+search_chunks()
+    ↓
+top_k relevant chunks
+    ↓
+generate_answer()
+    ↓
+answer + sources
+```
+
+示例：
+
+```python
+response = ask_rag("what should we do with high delay trips", top_k=3)
+```
+
+返回内容包括：
+
+```python
+{
+    "answer": "...",
+    "sources": [...],
+    "results": [...]
+}
+```
+
+---
+
+## 检索逻辑
+
+目前 V6 使用 keyword-based retrieval，还没有使用 embedding。
+
+检索时会做：
+
+* 统一大小写
+* 去掉 stop words
+* 简单 normalization
+* 计算 score
+* 使用 min_score 过滤弱相关结果
+* 使用 required_words 强制匹配核心词
+* 使用 top_k 返回最相关结果
+
+---
+
+## 测试问题
+
+我用以下问题测试了 RAG engine：
+
+```text
+what should we do with high delay trips
+what should we check if fuel cost is high
+what should we know about Chongqing-Kunming route
+why is cost per kilometre important
+what should managers do with high risk trucks
+```
+
+测试结果基本可以正确匹配到对应知识文件。
+
+| 问题类型               | 主要来源                                 |
+| ------------------ | ------------------------------------ |
+| high delay         | `fleet_policy.txt`, `risk_rules.txt` |
+| fuel cost          | `fleet_policy.txt`, `cost_notes.txt` |
+| specific route     | `route_notes.txt`                    |
+| cost per kilometre | `cost_notes.txt`                     |
+| high risk trucks   | `fleet_policy.txt`, `risk_rules.txt` |
 
 ---
 
 ## 项目结构
 
 ```text
-FleetMind-Web-V5/
-│
-├── app.py
-├── database.py
-├── fleetmind_core.py
-├── init_db.py
-├── init_trips.py
-├── fix_trip_risk_levels.py
-├── fleetmind.db
-├── README.md
-│
-├── templates/
-│   ├── index.html
-│   ├── dashboard.html
-│   ├── analytics.html
-│   ├── insights.html
-│   ├── records.html
-│   ├── trips.html
-│   ├── route_analytics.html
-│   ├── add_trip.html
-│   ├── edit_trip.html
-│   ├── edit_truck.html
-│   └── ...
-│
-├── static/
-│   ├── style.css
-│   └── charts/
+FleetMind-Web-V6/
+    app.py
+    database.py
+    fleetmind_core.py
+    rag_engine.py
+    requirements.txt
+    README.md
+    .gitignore
+
+    knowledge_base/
+        risk_rules.txt
+        route_notes.txt
+        fleet_policy.txt
+        cost_notes.txt
+
+    templates/
+    static/
 ```
 
 ---
 
 ## 如何运行
 
-安装依赖：
+在项目目录下运行：
 
 ```bash
-pip install flask matplotlib
+python3 rag_engine.py
 ```
 
-初始化 truck 数据：
+程序会自动测试一组问题，并输出回答和 sources。
 
-```bash
-python3 init_db.py
+---
+
+## 遇到的问题
+
+### 1. `.endswith()` 写错
+
+一开始把：
+
+```python
+filename.endswith(".txt")
 ```
 
-初始化 trip 数据：
+写成了：
 
-```bash
-python3 init_trips.py
+```python
+filename.endwith(".txt")
 ```
 
-如需修复旧 trip 风险等级：
+导致报错。后来改成正确的：
 
-```bash
-python3 fix_trip_risk_levels.py
-```
-
-运行项目：
-
-```bash
-python3 app.py
-```
-
-浏览器打开：
-
-```text
-http://127.0.0.1:5001
+```python
+endswith()
 ```
 
 ---
 
-## 当前版本总结
+### 2. chunk 切分问题
 
-FleetMind Web V5 已经从一个 CSV dashboard 升级成了一个 SQLite database-driven fleet analytics platform。
+一开始文档没有很好切分。后来使用：
 
-现在系统支持：
-
-```text
-Truck CRUD
-Trip CRUD
-Fleet Dashboard
-Fleet Analytics
-Operational Insights
-Trip Records
-Trip-Level Insights
-Route Analytics
-Route-Level Insights
+```python
+content.split("\n\n")
 ```
 
-对我来说，V5 最大的进步是：
-它不再只是一个展示数据的网页，而是一个有数据库、有增删改查、有分析结果、有业务建议的小型物流数据系统。
+按空行切分文档。
+
+这让我理解到：RAG 里 chunk 的质量和文档格式有关。
 
 ---
 
-## 下一步计划：FleetMind V6
+### 3. 检索结果太杂
 
-V6 我计划做成：
+一开始只用简单关键词匹配，结果会比较杂。后来逐步加入：
 
 ```text
-RAG-based Intelligent Logistics Assistant
+stop words
+normalization
+min_score
+required_words
+top_k
 ```
 
-也就是让 AI assistant 不只是固定回答，而是可以根据数据库里的 truck、trip 和 route 数据回答问题。
-
-未来可以加入：
-
-* RAG-based assistant
-* 自然语言查询数据库
-* 按 route、truck、risk level、date 筛选
-* Chart.js 或 Plotly 交互式图表
-* 更专业的表单验证和删除确认
-* 简单的利润或延误预测
+检索结果变得更稳定。
 
 ---
 
-## Final Reflection
+## 我学到了什么
 
-FleetMind V5 对我来说是一次比较完整的项目升级。
+通过 V6，我第一次比较完整地理解了 RAG 的基础流程：
 
-我从一个简单 Python 项目开始，一步步加入网页、数据库、dashboard、analytics、insights、trip records、route analytics 和 CRUD。过程中也遇到了很多问题，比如数据库没有更新、旧规则和新规则不一致、页面文字没有同步修改、数据不能编辑删除等。
+* RAG 不是一开始就调用 AI
+* 知识库质量很重要
+* documents 需要切成 chunks
+* retrieval 是 RAG 的核心
+* score 和 top_k 会影响结果质量
+* sources 可以让回答更可信
+* RAG 需要不断测试和调试
 
-这些问题让我更理解真实项目开发的过程：
-不是把功能写出来就结束，还要不断测试、发现问题、修复问题，并让系统结构变得更合理。
+这个版本虽然还没有使用 embedding 或真正的大模型 API，但它让我理解了 RAG 的底层逻辑。
 
+---
+
+## 下一步计划
+
+后续可以继续升级：
+
+* 把 RAG assistant 接入 Flask 页面
+* 新增 `/rag-assistant` 页面
+* 支持中文问题检索
+* 接入 SQLite 数据库，让 assistant 同时读取 fleet data
+* 使用 embedding 做语义检索
+* 接入 OpenAI API 生成更自然的回答
+* 在网页中显示 retrieved chunks 和 sources
+
+---
+
+## 总结
+
+FleetMind V6 是我从传统数据分析项目走向 AI application 的一个重要版本。
+
+它把：
+
+```text
+物流业务知识 + 数据分析 + RAG assistant
+```
+
+结合在了一起。
+
+这个版本最大的意义是：我没有直接复制复杂框架，而是先用基础 Python 逻辑理解 RAG 是怎么工作的。
+
+```
+
+保存后我们再继续检查 remote，确保后面上传到 `FleetMind-Web-V6`，不是 V5。
+```

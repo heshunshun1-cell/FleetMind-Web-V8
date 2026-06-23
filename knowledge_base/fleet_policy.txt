@@ -1,0 +1,36 @@
+FleetMind Fleet Policy
+
+# 中文说明：这个文件保存车队管理政策，用来帮助 RAG assistant 回答管理决策类问题。
+
+Fleet managers should review High Risk trucks and trips before reviewing Normal records.
+# 中文解释：车队经理应该优先复查高风险车辆和高风险运输任务，再处理普通记录。
+
+Loss-making trucks should be checked for pricing, fuel usage, toll cost, repair cost, and route planning.
+# 中文解释：亏损车辆应该检查定价、燃油使用、过路费、维修成本和路线规划。
+
+Trips with high delay should be reviewed for loading time, traffic conditions, driver schedule, and customer communication.
+# 中文解释：高延误运输任务应该检查装货时间、交通情况、司机排班和客户沟通。
+
+If the same route repeatedly produces low profit margin, the company should review route pricing and cost control.
+# 中文解释：如果同一条路线反复出现低利润率，公司应该复查路线定价和成本控制。
+
+If a truck repeatedly appears in High Risk records, the manager should check driver behaviour, vehicle condition, and assigned routes.
+# 中文解释：如果一辆车反复出现在高风险记录中，经理应该检查司机行为、车辆状态和分配路线。
+
+If fuel cost becomes the main cost pressure, the company should compare planned distance with actual distance and check fuel efficiency.
+# 中文解释：如果燃油成本成为主要成本压力，公司应该比较计划距离和实际距离，并检查燃油效率。
+
+If repair cost increases quickly, the company should consider preventive maintenance before the truck is assigned to long-distance trips.
+# 中文解释：如果维修成本快速上升，公司应该在车辆继续执行长途任务前考虑预防性保养。
+
+If delay is caused by loading time, the operations team should improve warehouse coordination and departure scheduling.
+# 中文解释：如果延误来自装货时间，运营团队应该优化仓库协调和发车排班。
+
+If delay is caused by customer communication problems, the company should confirm delivery windows earlier.
+# 中文解释：如果延误来自客户沟通问题，公司应该更早确认交付时间窗口。
+
+If a route has stable demand and strong profit margin, it can be used as a benchmark route for planning.
+# 中文解释：如果一条路线需求稳定且利润率强，可以作为路线规划的标杆路线。
+
+FleetMind recommendations are decision-support notes, not final management decisions.
+# 中文解释：FleetMind 的建议属于决策支持提示，不等于最终管理决策。
