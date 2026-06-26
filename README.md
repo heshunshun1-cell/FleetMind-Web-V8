@@ -1,361 +1,759 @@
 # FleetMind Web V6
 
-## 项目简介
+FleetMind Web V6 是一个基于 Flask 的物流车队运营分析与 RAG 问答助手项目。
 
-FleetMind 是我从 Python 基础项目一步步升级出来的物流车队运营分析系统。
+这个项目是从我之前的 FleetMind V1 到 V5 一步一步升级来的。最开始它只是一个 Python 终端程序，用来分析单辆货车的收入、成本、利润和风险。后来我把它升级成 Flask 网页应用，再加入 dashboard、SQLite 数据库、trip records、route analytics。到了 V6，我开始尝试把 RAG（Retrieval-Augmented Generation，检索增强生成）接入项目，让系统不只是展示数据，还能根据知识库和数据库内容回答一些简单的物流管理问题。
 
-前几个版本主要完成了车辆成本分析、Flask 网页、CSV 记录、Dashboard 可视化、SQLite 数据库、Trip records 和 Route analytics。到了 V6，我开始尝试加入 RAG 思想，让 FleetMind 不只是展示数据，也可以根据自己的知识库回答一些车队运营问题。
-
-V6 的核心定位是：
-
-> FleetMind V6 - RAG-based Fleet Operations Assistant  
-> 基于 RAG 的车队运营问答助手
-
-目前这个版本还没有接入真正的大模型 API，而是一个我自己手写的 simple rule-based RAG prototype。重点是理解 RAG 的底层流程。
+项目灵感来自我之前接触过的物流运输场景，但项目里的数据都经过匿名化和修改，不包含真实公司、司机、车牌、客户或敏感路线信息。
 
 ---
 
-## 从 V1 到 V6 的升级
+## 1. Project Overview 项目简介
 
-| 版本 | 主要内容 |
-|---|---|
-| V1 | Python 命令行车辆成本分析 |
-| V2 | Flask 网页版，可以输入车辆数据 |
-| V3 | 加入 CSV records，保存和查看历史车辆记录 |
-| V4 | 加入 Dashboard 和图表分析 |
-| V5 | 升级 SQLite 数据库，加入 trucks、trips、route analytics 和 insights |
-| V6 | 加入 knowledge base 和 simple RAG assistant，支持运营问答 |
+FleetMind Web V6 的目标是探索一个物流分析系统如何从传统 dashboard 升级为一个简单的 AI-assisted decision support tool。
 
----
+在 V6 中，系统不仅可以分析车辆和运输任务数据，还可以通过本地知识库和 SQLite 数据库回答运营相关问题。
 
-## 为什么做 V6
+目前系统可以完成：
 
-V5 已经可以分析车辆和运输任务数据，也能生成一些 rule-based insights。
-
-但是 V5 的建议是固定规则生成的，用户不能自由提问。
-
-例如，V5 可以显示：
-
-```text
-This trip is High Risk.
-````
-
-但它不能很好回答：
-
-```text
-为什么 high delay trip 需要复查？
-fuel cost 太高时应该检查什么？
-Chongqing-Kunming route 有什么特点？
-cost per kilometre 为什么重要？
-```
-
-所以 V6 的目标是：
-
-> 让 FleetMind 可以根据自己的知识库，回答一些物流运营相关问题。
+* 车辆收入、成本、利润、利润率分析
+* 风险等级判断，例如 Excellent、Normal、Warning、High Risk
+* SQLite 数据库存储 trucks、trips、routes 相关数据
+* Dashboard 数据汇总
+* Analytics 图表展示
+* Trip records 增删改查
+* Route analytics 路线层面分析
+* Rule-based operational insights
+* 本地 knowledge base 文档检索
+* RAG Assistant 网页问答
+* 结合知识库结果和数据库结果生成管理建议
 
 ---
 
-## 什么是 RAG
+## 2. Tech Stack 技术栈
 
-RAG 全称是 Retrieval-Augmented Generation。
+这个项目主要使用：
 
-我对它的理解是：
+* Python
+* Flask
+* SQLite
+* HTML
+* CSS
+* Jinja2
+* Matplotlib
+* Local text-based RAG
+* Keyword-based retrieval
+* Rule-based decision support
 
-```text
-先查资料，再组织回答。
-```
+V6 暂时没有接入 OpenAI API 或其他大模型 API。现在的 RAG 是一个本地实验版本，主要目的是帮助我理解 RAG 的基本结构，包括知识库、检索、上下文组织、数据库检索和回答生成。
 
-它主要包括三步：
+---
 
-| 部分         | 中文理解 | 在 FleetMind V6 中的作用 |
-| ---------- | ---- | ------------------- |
-| Retrieval  | 检索   | 从知识库中找出和问题相关的内容     |
-| Augmented  | 增强   | 把检索到的内容作为回答依据       |
-| Generation | 生成   | 根据找到的内容组织回答         |
+## 3. Main Features 主要功能
 
-在 FleetMind V6 中，流程是：
+### 3.1 Fleet Dashboard
+
+Dashboard 页面可以展示车队整体运营情况，包括：
+
+* Truck count
+* Total revenue
+* Total cost
+* Total profit
+* Average profit margin
+* High risk trucks count
+* Best truck
+* Worst truck
+* Most common cost pressure
+
+这个页面主要用来快速了解整个车队的经营表现。
+
+---
+
+### 3.2 Fleet Analytics
+
+Analytics 页面会基于 SQLite 数据库生成图表和汇总信息，包括：
+
+* Revenue by truck
+* Profit by truck
+* Risk level distribution
+* Cost pressure distribution
+* Loss-making trucks
+
+这个功能从之前的 CSV 版本升级而来。V6 里主要数据来源已经变成 SQLite 数据库，因此数据更加结构化，也更方便后续继续扩展。
+
+---
+
+### 3.3 Truck Records
+
+Truck records 页面可以查看保存到数据库里的车辆数据。
+
+每辆车包含：
+
+* Truck ID
+* Driver
+* Route
+* Revenue
+* Fuel cost
+* Toll cost
+* Repair cost
+* Salary cost
+* Insurance cost
+* Other cost
+* Total cost
+* Profit
+* Profit margin
+* Risk level
+* Main cost pressure
+
+系统会根据输入的收入和成本自动计算利润、利润率、风险等级和主要成本压力。
+
+---
+
+### 3.4 Trip Records
+
+V5 开始我加入了 trip-level records，V6 中继续保留并完善。
+
+每条 trip record 包括：
+
+* Trip ID
+* Truck ID
+* Driver
+* Route
+* Distance
+* Revenue
+* Total cost
+* Profit
+* Profit margin
+* Cost per km
+* Delay hours
+* Risk level
+* Trip date
+
+这个设计让项目不再只是分析“单辆车”，而是可以分析具体运输任务。
+
+---
+
+### 3.5 Route Analytics
+
+Route analytics 页面会基于 trips 表，按照路线进行分组分析。
+
+系统可以计算每条路线的：
+
+* Total trips
+* Total revenue
+* Total cost
+* Total profit
+* Average profit margin
+* Average delay hours
+* Average cost per km
+* Route risk level
+
+这个功能让项目更接近真实物流管理，因为公司在实际运营中经常需要判断哪条路线利润高、哪条路线延误严重、哪条路线成本压力最大。
+
+---
+
+### 3.6 Operational Insights
+
+Insights 页面会根据数据库记录生成 rule-based 建议。
+
+例如：
+
+* 如果车辆亏损，提示检查定价、路线规划和运营成本
+* 如果车辆是 High Risk，提示管理层优先 review
+* 如果 profit margin 很低，提示需要成本控制或路线调整
+* 如果某类成本压力最常见，提示公司优先关注该成本项
+* 如果某条路线延误最高，提示需要检查路线安排和调度计划
+
+这部分不是机器学习模型，而是基于规则的 decision support system。
+
+---
+
+## 4. V6 RAG Assistant
+
+V6 最大的升级是加入了一个简单的 RAG Assistant。
+
+RAG 的全称是 Retrieval-Augmented Generation，中文可以理解为“检索增强生成”。
+
+在这个项目里，我实现的是一个本地简化版 RAG。它不会调用大模型 API，而是通过读取本地 txt 文档、关键词检索、数据库查询和规则化回答生成，来模拟一个物流管理问答助手。
+
+---
+
+## 5. V6 Development Progress 开发过程
+
+### V6.1 Knowledge Base
+
+第一步是建立 `knowledge_base/` 文件夹。
+
+里面放了一些和物流运营相关的 txt 文件，例如：
+
+* `fleet_policy.txt`
+* `risk_rules.txt`
+* `route_notes.txt`
+* `cost_notes.txt`
+
+这些文件用来模拟公司的内部知识库，包括路线说明、风险规则、成本说明和管理政策。
+
+我在这一步主要学习了 knowledge base 的概念。以前项目里的数据主要是结构化数据，例如 SQLite 表格；而 knowledge base 更像是非结构化文本资料，用自然语言记录规则和经验。
+
+---
+
+### V6.2 Simple Retrieval
+
+第二步是写 `rag_engine.py`。
+
+这一版实现了几个基础功能：
+
+* 读取 `knowledge_base/` 里的 txt 文件
+* 把文档内容按照空行切成 chunks
+* 把用户问题拆成关键词
+* 去掉一些无意义的停用词
+* 对问题和 chunk 进行简单匹配
+* 根据 score 排序
+* 返回最相关的知识片段和 sources
+
+这一阶段我主要理解了 retrieval 的基本流程：
 
 ```text
 用户问题
-→ 读取 knowledge_base
-→ 切分成 chunks
-→ 检索相关 chunks
-→ 生成回答
-→ 显示 sources
+→ 拆分关键词
+→ 搜索知识库 chunks
+→ 计算匹配分数
+→ 返回相关内容
 ```
+
+虽然这个检索方式还比较简单，不是 embedding-based search，但它帮助我理解了 RAG 里 retrieval 的核心思想。
 
 ---
 
-## V6 新增内容
+### V6.3 RAG Assistant Page
 
-### 1. knowledge_base 知识库
+第三步是把 RAG assistant 接入 Flask 页面。
 
-V6 新增了：
-
-```text
-knowledge_base/
-```
-
-里面包括：
-
-```text
-risk_rules.txt
-route_notes.txt
-fleet_policy.txt
-cost_notes.txt
-```
-
-| 文件                 | 作用                                               |
-| ------------------ | ------------------------------------------------ |
-| `risk_rules.txt`   | 风险判断规则，例如 High Risk、Warning、delay 规则             |
-| `route_notes.txt`  | 路线运营知识，例如重庆到广州、深圳、昆明等路线特点                        |
-| `fleet_policy.txt` | 车队管理政策，例如高风险记录优先复查                               |
-| `cost_notes.txt`   | 成本分析知识，例如 fuel cost、toll cost、cost per kilometre |
-
-这些知识文件采用中英双语形式，方便学习和展示。
-
----
-
-### 2. rag_engine.py
-
-V6 新增了：
-
-```text
-rag_engine.py
-```
-
-它实现了一个简单 RAG engine。
-
-主要函数：
-
-| 函数                              | 作用                |
-| ------------------------------- | ----------------- |
-| `load_documents()`              | 读取知识库 txt 文件      |
-| `split_documents_into_chunks()` | 把文档切成 chunks      |
-| `normalize_word()`              | 简单处理单复数和标点        |
-| `search_chunks()`               | 检索相关 chunks       |
-| `clean_text()`                  | 清理输出文本            |
-| `generate_answer()`             | 生成回答              |
-| `get_sources()`                 | 提取 sources        |
-| `ask_rag()`                     | 封装完整 RAG pipeline |
-
----
-
-## 当前 RAG 流程
-
-```text
-question
-    ↓
-load_documents()
-    ↓
-documents
-    ↓
-split_documents_into_chunks()
-    ↓
-chunks
-    ↓
-search_chunks()
-    ↓
-top_k relevant chunks
-    ↓
-generate_answer()
-    ↓
-answer + sources
-```
-
-示例：
+我新增了 `/rag` 页面，用户可以在网页输入问题。Flask 接收到问题后，会调用：
 
 ```python
-response = ask_rag("what should we do with high delay trips", top_k=3)
+ask_rag(question)
 ```
 
-返回内容包括：
+然后 `rag_engine.py` 会检索知识库，并把回答和 sources 返回给网页。
 
-```python
-{
-    "answer": "...",
-    "sources": [...],
-    "results": [...]
-}
-```
-
----
-
-## 检索逻辑
-
-目前 V6 使用 keyword-based retrieval，还没有使用 embedding。
-
-检索时会做：
-
-* 统一大小写
-* 去掉 stop words
-* 简单 normalization
-* 计算 score
-* 使用 min_score 过滤弱相关结果
-* 使用 required_words 强制匹配核心词
-* 使用 top_k 返回最相关结果
-
----
-
-## 测试问题
-
-我用以下问题测试了 RAG engine：
+这一步完成后，用户可以在网页上问：
 
 ```text
 what should we do with high delay trips
-what should we check if fuel cost is high
-what should we know about Chongqing-Kunming route
-why is cost per kilometre important
+```
+
+页面会返回相关知识库内容，并显示来源文件。
+
+这一阶段我主要学习了 Flask 表单和 RAG 函数之间的连接方式：
+
+```text
+HTML form
+→ Flask request.form
+→ ask_rag(question)
+→ return answer and sources
+→ render_template 显示结果
+```
+
+---
+
+### V6.4 Database Retrieval
+
+第四步是让 RAG assistant 不只检索 txt 文件，还能查询 SQLite 数据库。
+
+我在 `database.py` 里新增了：
+
+```python
+get_high_risk_trucks_from_db()
+```
+
+这个函数可以从 `trucks` 表里查出 `risk_level = High Risk` 的车辆。
+
+然后在 `rag_engine.py` 里新增了：
+
+```python
+get_database_context(question)
+```
+
+这个函数会判断用户问题是否和 high risk trucks 有关。如果问题里包含 `high risk` 和 `truck`，系统就会查询 SQLite 数据库，并把高风险车辆整理成文字结果。
+
+例如用户问：
+
+```text
+which trucks are high risk
+```
+
+系统可以返回：
+
+```text
+Database Result - High Risk Trucks
+
+Truck ID: Truck 017
+Driver: Dong dong
+Route: Chongqing to Singapore
+Revenue: 120000.0
+Total Cost: 128200.0
+Profit: -8200.0
+Profit Margin: -6.83%
+Risk Level: High Risk
+Main Cost Pressure: Fuel Cost
+```
+
+这一阶段让我理解了 structured data 和 unstructured data 的区别：
+
+* `knowledge_base/*.txt` 是非结构化文本
+* `fleetmind.db` 是结构化数据库
+* RAG assistant 可以同时使用这两类信息作为回答上下文
+
+---
+
+### V6.5 Better Answer Logic
+
+第五步是优化回答结构。
+
+在 V6.4 中，系统只是把知识库结果和数据库结果简单拼接在一起。功能可以用，但回答看起来还不够像管理建议。
+
+所以 V6.5 中我新增了：
+
+```python
+generate_management_answer(question, doc_results, db_results)
+```
+
+这个函数会把回答整理成更清楚的结构：
+
+```text
+Question
+
+Management Answer
+
+Database Findings
+
+Knowledge Base Findings
+
+Suggested Action
+```
+
+这样系统不只是把资料列出来，而是更像一个基础的 decision support assistant。
+
+例如用户问：
+
+```text
 what should managers do with high risk trucks
 ```
 
-测试结果基本可以正确匹配到对应知识文件。
+系统会先展示数据库中的高风险车辆，再展示知识库中相关的风险规则，最后给出 suggested action，例如优先 review 高风险车辆、检查利润率、主要成本压力、路线表现，以及是否需要调整路线、控制成本或安排维修检查。
 
-| 问题类型               | 主要来源                                 |
-| ------------------ | ------------------------------------ |
-| high delay         | `fleet_policy.txt`, `risk_rules.txt` |
-| fuel cost          | `fleet_policy.txt`, `cost_notes.txt` |
-| specific route     | `route_notes.txt`                    |
-| cost per kilometre | `cost_notes.txt`                     |
-| high risk trucks   | `fleet_policy.txt`, `risk_rules.txt` |
+这一阶段的重点是从 retrieval system 升级到 management recommendation system。
 
 ---
 
-## 项目结构
+## 6. Challenges and Solutions 遇到的问题与解决方法
+
+### 6.1 不清楚 RAG 的整体结构
+
+刚开始做 V6 时，我对 RAG 的理解还比较模糊，只知道它和知识库问答有关，但不清楚代码里应该怎么组织。
+
+后来我把它拆成几个部分：
+
+```text
+Knowledge Base
+→ Retrieval
+→ Context
+→ Answer Generation
+→ Sources
+```
+
+这样之后，整个结构就清楚很多。V6.1 到 V6.5 其实就是按照这个顺序一步一步做出来的。
+
+---
+
+### 6.2 文档检索结果不够准确
+
+一开始关键词搜索比较粗糙，用户问 delay 的时候，有时候会检索到不太相关的内容。
+
+为了解决这个问题，我加入了：
+
+* stop words
+* normalize_word()
+* 简单复数处理，例如 trips → trip
+* required_words 判断，例如 delay 问题必须包含 delay
+* score 排序
+* top_k 控制返回数量
+
+虽然这还不是专业搜索引擎，但比最初版本稳定很多。
+
+---
+
+### 6.3 Flask 页面找不到 base.html
+
+在接入 `/rag` 页面时，我一开始用了：
+
+```html
+{% extends "base.html" %}
+```
+
+但是项目里并没有 `base.html`，所以 Flask 报错：
+
+```text
+TemplateNotFound: base.html
+```
+
+解决方法是把 `rag.html` 改成一个完整 HTML 页面，不再依赖 `base.html`。
+
+这个问题让我理解到：Jinja2 的模板继承虽然很方便，但前提是项目里真的有对应的 base template。
+
+---
+
+### 6.4 app.py 和 rag_engine.py 的连接问题
+
+RAG 接入 Flask 时，需要在 `app.py` 里导入：
+
+```python
+from rag_engine import ask_rag
+```
+
+然后 `/rag` route 里调用：
+
+```python
+response = ask_rag(question)
+```
+
+一开始我对这个流程还不熟悉。后来理解为：
+
+```text
+app.py 负责网页请求
+rag_engine.py 负责检索和回答
+```
+
+这样分工之后，代码结构就更清楚了。
+
+---
+
+### 6.5 字典取值写错
+
+在 Flask route 中，我一开始把：
+
+```python
+sources = response["sources"]
+```
+
+写成了类似：
+
+```python
+sources = response("sources")
+```
+
+这个错误的原因是我把 dictionary 当成函数调用了。
+
+后来我理解了：
+
+```text
+函数调用用 ()
+字典取值用 []
+```
+
+所以应该写：
+
+```python
+response["answer"]
+response["sources"]
+```
+
+这个问题虽然小，但对我理解 Python dictionary 很有帮助。
+
+---
+
+### 6.6 数据库字段和查询函数要对应
+
+V6.4 加 database retrieval 时，需要确保 SQL 里的字段名和 SQLite 表里的字段一致。
+
+例如：
+
+```sql
+SELECT truck_id, driver, route, revenue, total_cost, profit, profit_margin, risk_level
+FROM trucks
+WHERE risk_level = 'High Risk'
+```
+
+如果字段名写错，系统就会报错。
+
+所以我先检查了 `database.py` 和 trucks 表的字段，再写查询函数。这个过程让我更加理解数据库结构设计和代码调用之间的关系。
+
+---
+
+### 6.7 函数名不一致导致 NameError
+
+V6.5 时，我一开始有两个类似的函数：
+
+```python
+generate_management_recommendation()
+generate_management_answer()
+```
+
+后来 `ask_rag()` 里调用的是 `generate_management_answer()`，但文件里没有正确放这个函数，就可能导致：
+
+```text
+NameError: name 'generate_management_answer' is not defined
+```
+
+解决方法是统一函数职责：
+
+* `generate_answer()`：基础知识库回答
+* `generate_management_answer()`：V6.5 管理建议回答
+* `generate_management_recommendation()`：旧版函数，可以不用或后续删除
+
+这让我意识到函数命名和函数职责要保持清楚，否则项目越大越容易混乱。
+
+---
+
+### 6.8 忘记给 lower() 加括号
+
+测试 V6.5 时，页面报错：
+
+```text
+TypeError: argument of type 'builtin_function_or_method' is not iterable
+```
+
+原因是我写成了：
+
+```python
+question_lower = question.lower
+```
+
+正确写法应该是：
+
+```python
+question_lower = question.lower()
+```
+
+`question.lower` 只是拿到方法本身，`question.lower()` 才是真的执行转小写。
+
+这个问题让我更加注意 Python 方法调用时括号的重要性。
+
+---
+
+### 6.9 页面显示格式不够好
+
+V6.5 初版里，Database Findings 每一行前面都有 `-`，看起来像散乱列表，不太像管理报告。
+
+后来我优化了显示逻辑：
+
+* 数据库标题不加横线
+* Truck ID 前面加空行
+* 其他字段正常显示
+* Suggested Action 单独分区
+
+这样最终输出更像一份运营管理建议报告。
+
+---
+
+## 7. Project Structure 项目结构
+
+当前项目大致结构如下：
 
 ```text
 FleetMind-Web-V6/
-    app.py
-    database.py
-    fleetmind_core.py
-    rag_engine.py
-    requirements.txt
-    README.md
-    .gitignore
-
-    knowledge_base/
-        risk_rules.txt
-        route_notes.txt
-        fleet_policy.txt
-        cost_notes.txt
-
-    templates/
-    static/
+├── app.py
+├── database.py
+├── fleetmind_core.py
+├── rag_engine.py
+├── fleetmind.db
+├── knowledge_base/
+│   ├── cost_notes.txt
+│   ├── fleet_policy.txt
+│   ├── risk_rules.txt
+│   └── route_notes.txt
+├── templates/
+│   ├── index.html
+│   ├── dashboard.html
+│   ├── analytics.html
+│   ├── records.html
+│   ├── trips.html
+│   ├── route_analytics.html
+│   ├── insights.html
+│   ├── rag.html
+│   └── ...
+├── static/
+│   ├── style.css
+│   └── charts/
+└── README.md
 ```
 
 ---
 
-## 如何运行
+## 8. How to Run 如何运行
 
-在项目目录下运行：
+### 1. Clone the repository
 
 ```bash
-python3 rag_engine.py
+git clone https://github.com/your-username/FleetMind-Web-V6.git
+cd FleetMind-Web-V6
 ```
 
-程序会自动测试一组问题，并输出回答和 sources。
+### 2. Install dependencies
 
----
-
-## 遇到的问题
-
-### 1. `.endswith()` 写错
-
-一开始把：
-
-```python
-filename.endswith(".txt")
+```bash
+pip install flask matplotlib
 ```
 
-写成了：
+### 3. Run the Flask app
 
-```python
-filename.endwith(".txt")
+```bash
+python app.py
 ```
 
-导致报错。后来改成正确的：
+或者：
 
-```python
-endswith()
+```bash
+python3 app.py
 ```
 
----
-
-### 2. chunk 切分问题
-
-一开始文档没有很好切分。后来使用：
-
-```python
-content.split("\n\n")
-```
-
-按空行切分文档。
-
-这让我理解到：RAG 里 chunk 的质量和文档格式有关。
-
----
-
-### 3. 检索结果太杂
-
-一开始只用简单关键词匹配，结果会比较杂。后来逐步加入：
+### 4. Open in browser
 
 ```text
-stop words
-normalization
-min_score
-required_words
-top_k
+http://127.0.0.1:5001
 ```
 
-检索结果变得更稳定。
-
----
-
-## 我学到了什么
-
-通过 V6，我第一次比较完整地理解了 RAG 的基础流程：
-
-* RAG 不是一开始就调用 AI
-* 知识库质量很重要
-* documents 需要切成 chunks
-* retrieval 是 RAG 的核心
-* score 和 top_k 会影响结果质量
-* sources 可以让回答更可信
-* RAG 需要不断测试和调试
-
-这个版本虽然还没有使用 embedding 或真正的大模型 API，但它让我理解了 RAG 的底层逻辑。
-
----
-
-## 下一步计划
-
-后续可以继续升级：
-
-* 把 RAG assistant 接入 Flask 页面
-* 新增 `/rag-assistant` 页面
-* 支持中文问题检索
-* 接入 SQLite 数据库，让 assistant 同时读取 fleet data
-* 使用 embedding 做语义检索
-* 接入 OpenAI API 生成更自然的回答
-* 在网页中显示 retrieved chunks 和 sources
-
----
-
-## 总结
-
-FleetMind V6 是我从传统数据分析项目走向 AI application 的一个重要版本。
-
-它把：
+RAG Assistant 页面：
 
 ```text
-物流业务知识 + 数据分析 + RAG assistant
+http://127.0.0.1:5001/rag
 ```
 
-结合在了一起。
+---
 
-这个版本最大的意义是：我没有直接复制复杂框架，而是先用基础 Python 逻辑理解 RAG 是怎么工作的。
+## 9. Example Questions 示例问题
 
+可以在 `/rag` 页面测试：
+
+```text
+what should we do with high delay trips
 ```
 
-保存后我们再继续检查 remote，确保后面上传到 `FleetMind-Web-V6`，不是 V5。
+```text
+what should we check if fuel cost is high
+```
+
+```text
+which trucks are high risk
+```
+
+```text
+what should managers do with high risk trucks
+```
+
+```text
+what should we know about Chongqing-Kunming route
+```
+
+---
+
+## 10. What I Learned 学到的内容
+
+通过 V6，我主要学习到了：
+
+* Flask route 和 HTML form 如何连接
+* 如何用 SQLite 存储和查询结构化数据
+* 如何把 txt 文件作为本地知识库
+* 如何把文档切成 chunks
+* 如何做简单关键词检索
+* 如何计算检索 score
+* 如何返回 sources
+* 如何把数据库查询结果作为 RAG context
+* 如何组织 doc_results 和 db_results
+* 如何生成结构化 management recommendation
+* 如何 debug Flask 和 Python 报错
+* 如何逐步把一个学生项目升级成更完整的 portfolio project
+
+---
+
+## 11. V5 to V6 Improvements
+
+相比 V5，V6 的主要升级是：
+
+| 方面   | V5                                     | V6                                          |
+| ---- | -------------------------------------- | ------------------------------------------- |
+| 数据来源 | SQLite database                        | SQLite + knowledge_base                     |
+| 核心功能 | 数据库驱动的运营分析                             | 数据库分析 + RAG 问答                              |
+| 页面   | Dashboard / Analytics / Trips / Routes | 新增 RAG Assistant                            |
+| 建议逻辑 | Rule-based insights                    | RAG + database + management answer          |
+| 数据类型 | Structured data                        | Structured + unstructured data              |
+| 项目定位 | Fleet analytics platform               | AI-assisted logistics decision support tool |
+
+---
+
+## 12. Limitations 当前不足
+
+V6 目前还是一个学习型项目，还有一些不足：
+
+* RAG 检索还是 keyword-based，不是 embedding-based semantic search
+* 没有接入真正的大语言模型 API
+* 回答生成主要是 rule-based template
+* 数据库检索目前主要支持 high risk trucks，问题类型还不够多
+* 没有用户登录和权限系统
+* 前端页面还比较简单
+* 数据量较小，还没有做性能优化
+* 缺少自动化测试
+
+这些不足也是后续版本可以继续改进的方向。
+
+---
+
+## 13. Future Improvements 后续改进方向
+
+之后可以继续升级：
+
+* 加入 embedding-based search
+* 接入 OpenAI API 或其他 LLM API
+* 支持更多数据库问题，例如 high delay trips、loss-making routes、high cost per km routes
+* 让 RAG assistant 能同时查询 trucks、trips、routes
+* 增加 conversation history
+* 优化前端 UI
+* 增加登录系统
+* 增加测试数据和自动化测试
+* 部署到云端
+* 加入更完整的 architecture diagram
+
+---
+
+## 14. Project Reflection 项目反思
+
+FleetMind V6 对我来说是一个很重要的版本。
+
+V1 到 V5 更多是在练习 Python、Flask、SQLite 和数据分析。V6 则让我开始接触 AI application 的基本结构，尤其是 RAG 的思想。
+
+这个项目还不是一个真正复杂的 AI 系统，但它让我理解到，一个 AI assistant 不只是“聊天框”，而是需要：
+
+```text
+数据来源
+检索逻辑
+上下文组织
+回答结构
+业务规则
+网页交互
+```
+
+这些部分组合在一起，才更接近一个实际可用的应用。
+
+FleetMind V6 让我把自己的物流背景、Python 编程、数据库课程知识和 AI/RAG 学习结合到了一起。它不是一个完美项目，但它记录了我从基础 Web dashboard 一步步升级到 AI-assisted logistics assistant 的过程。
+
+---
+
+## 15. Current Version Status
+
+当前版本：FleetMind Web V6.5 / V6.6 polish stage
+
+当前完成内容：
+
+* Knowledge base completed
+* Simple retrieval engine completed
+* Flask RAG page completed
+* SQLite database retrieval completed
+* Better management answer logic completed
+* README and portfolio polishing in progress
+
+FleetMind V6 当前可以定义为：
+
+```text
+A Flask-based AI logistics assistant that combines local knowledge-base retrieval with SQLite operational data to generate structured fleet management recommendations.
 ```

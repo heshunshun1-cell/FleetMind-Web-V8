@@ -179,6 +179,36 @@ def get_loss_making_trucks_from_db():
     return loss_making_trucks
 
 
+def get_high_risk_trucks_from_db():
+    """从 SQLite 数据库读取高风险车辆数据"""
+
+    # 连接数据库
+    conn = get_db_connection()
+
+    # 查询 risk_level 为 High Risk 的车辆
+    # 按利润率从低到高排序，方便优先看到最危险的车辆
+    high_risk_trucks = conn.execute("""
+        SELECT
+            truck_id,
+            driver,
+            route,
+            revenue,
+            total_cost,
+            profit,
+            profit_margin,
+            risk_level,
+            highest_cost_category
+        FROM trucks
+        WHERE risk_level = 'High Risk'
+        ORDER BY profit_margin ASC
+    """).fetchall()
+
+    # 关闭数据库连接
+    conn.close()
+
+    return high_risk_trucks
+
+
 def generate_revenue_chart_from_db():
     """从 SQLite 数据库生成 Revenue by Truck 图表"""
 

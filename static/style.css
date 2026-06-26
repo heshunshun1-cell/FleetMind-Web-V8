@@ -434,3 +434,57 @@ pre {
     line-height: 1.6;
     color: #333;
 }
+
+/* RAG 问答页面整体表单 */
+.rag-form {
+    background: white;
+    padding: 24px;
+    border-radius: 10px;
+    margin-top: 20px;
+    margin-bottom: 24px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+/* RAG 问题输入框 */
+.rag-form textarea {
+    width: 100%;
+    margin-top: 10px;
+    padding: 12px;
+    font-size: 16px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    resize: vertical;
+}
+
+/* RAG 提交按钮 */
+.rag-form button {
+    margin-top: 14px;
+    padding: 10px 18px;
+    background-color: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+/* RAG 按钮悬停效果 */
+.rag-form button:hover {
+    background-color: #1d4ed8;
+}
+
+/* RAG 回答和来源区域 */
+.rag-answer,
+.rag-sources {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    margin-top: 18px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+/* 保留 RAG 回答里的换行格式 */
+.rag-answer pre {
+    white-space: pre-wrap;
+    line-height: 1.6;
+    font-family: Arial, sans-serif;
+}

@@ -3,6 +3,11 @@
 # render_template：用来显示 HTML 页面
 # request：用来接收网页表单提交的数据
 from flask import Flask, render_template, request, redirect
+
+# 从 rag_engine.py 导入 RAG 问答函数, 让 app.py 可以调用 RAG 引擎
+# ask_rag: 接收用户问题，并从 knowledge_base 里检索相关内容生成回答
+from rag_engine import ask_rag
+
 from database import (
     read_trucks_from_db,
     get_dashboard_data_from_db,
@@ -411,7 +416,32 @@ def route_analytics():
         route_insights=route_insights
     )
 
+# RAG Assistant 页面
+# GET：第一次打开页面，只显示输入框
+# POST：用户提交问题后，调用 rag_engine.py 生成回答
+@app.route("/rag", methods=["GET", "POST"])
+def rag_assistant():
+    answer = None
+    sources = []
+    question = ""
 
+    # 如果用户提交问题了，就调用 RAG 引擎生成回答
+    if request.method == "POST":
+        question = request.form.get("question", "")
+
+        # 避免空问题也去检索知识库
+        if question.strip() != "":
+            response = ask_rag(question)
+            answer = response["answer"]
+            sources = response ["sources"]
+
+    # 把问题，回答和来源传给 rag.html 页面
+    return render_template(
+        "rag.html",
+        question=question,
+        answer=answer,
+        sources=sources
+    )
 
 
 # 程序入口
