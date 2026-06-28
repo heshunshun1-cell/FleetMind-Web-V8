@@ -419,10 +419,12 @@ def route_analytics():
 # RAG Assistant 页面
 # GET：第一次打开页面，只显示输入框
 # POST：用户提交问题后，调用 rag_engine.py 生成回答
+# results 是知识库检索证据，包含：source, content, score, matched_keywords, matched_phrases
 @app.route("/rag", methods=["GET", "POST"])
 def rag_assistant():
     answer = None
     sources = []
+    results = []
     question = ""
 
     # 如果用户提交问题了，就调用 RAG 引擎生成回答
@@ -434,13 +436,15 @@ def rag_assistant():
             response = ask_rag(question)
             answer = response["answer"]
             sources = response ["sources"]
+            results = response["results"]
 
     # 把问题，回答和来源传给 rag.html 页面
     return render_template(
         "rag.html",
         question=question,
         answer=answer,
-        sources=sources
+        sources=sources,
+        results=results
     )
 
 

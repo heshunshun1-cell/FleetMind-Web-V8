@@ -730,6 +730,137 @@ def read_trips_from_db():
     return trips
 
 
+def get_high_delay_trips_from_db():
+    """从 SQLite 数据库读取高延误运输任务"""
+
+    # 连接数据库
+    conn = get_db_connection()
+
+    # 查询 delay_hours >= 24 的 trip
+    # 按延误时间从高到低排序，方便优先看到最严重的任务
+    high_delay_trips = conn.execute("""
+        SELECT
+            trip_id,
+            truck_id,
+            driver,
+            route,
+            distance,
+            revenue,
+            total_cost,
+            profit,
+            profit_margin,
+            cost_per_km,
+            delay_hours,
+            risk_level,
+            trip_date
+        FROM trips
+        WHERE delay_hours >= 24
+        ORDER BY delay_hours DESC
+    """).fetchall()
+
+    # 关闭数据库连接
+    conn.close()
+
+    return high_delay_trips
+
+
+def get_loss_making_trips_from_db():
+    """从 SQLite 数据库读取亏损运输任务"""
+
+    # 连接数据库
+    conn = get_db_connection()
+
+    # 查询 profit < 0 的 trip
+    # 按 profit 从低到高排序，亏损最严重的排前面
+    loss_making_trips = conn.execute("""
+        SELECT
+            trip_id,
+            truck_id,
+            driver,
+            route,
+            distance,
+            revenue,
+            total_cost,
+            profit,
+            profit_margin,
+            cost_per_km,
+            delay_hours,
+            risk_level,
+            trip_date
+        FROM trips
+        WHERE profit < 0
+        ORDER BY profit ASC
+    """).fetchall()
+
+    # 关闭数据库连接
+    conn.close()
+
+    return loss_making_trips
+
+
+def get_high_cost_per_km_trips_from_db():
+    """从 SQLite 数据库读取每公里成本较高的运输任务"""
+
+    # 连接数据库
+    conn = get_db_connection()
+
+    # 查询 trips 表中 cost_per_km 最高的运输任务
+    # 这里先取前 5 条，方便管理者优先查看成本最高的任务
+    high_cost_trips = conn.execute("""
+        SELECT
+            trip_id,
+            truck_id,
+            driver,
+            route,
+            distance,
+            revenue,
+            total_cost,
+            profit,
+            profit_margin,
+            cost_per_km,
+            delay_hours,
+            risk_level,
+            trip_date
+        FROM trips
+        ORDER BY cost_per_km DESC
+        LIMIT 5
+    """).fetchall()
+
+    # 关闭数据库连接
+    conn.close()
+
+    return high_cost_trips
+
+
+def get_route_performance_from_db():
+    """从 SQLite 数据库读取路线层面的汇总表现"""
+
+    # 连接数据库
+    conn = get_db_connection()
+
+    # 按 route 分组，统计每条路线的整体表现
+    route_performance = conn.execute("""
+        SELECT
+            route,
+            COUNT(*) AS total_trips,
+            SUM(distance) AS total_distance,
+            SUM(revenue) AS total_revenue,
+            SUM(total_cost) AS total_cost,
+            SUM(profit) AS total_profit,
+            AVG(profit_margin) AS average_profit_margin,
+            AVG(cost_per_km) AS average_cost_per_km,
+            AVG(delay_hours) AS average_delay_hours
+        FROM trips
+        GROUP BY route
+        ORDER BY average_cost_per_km DESC
+    """).fetchall()
+
+    # 关闭数据库连接
+    conn.close()
+
+    return route_performance
+
+
 def save_trip_to_db(trip_data):
     """保存一条新的 trip record 到 SQLite 数据库"""
 
