@@ -839,6 +839,7 @@ def get_route_performance_from_db():
     conn = get_db_connection()
 
     # 按 route 分组，统计每条路线的整体表现
+    # 这里按平均延误时间从高到低排序，方便 RAG 优先看到延误最严重的路线
     route_performance = conn.execute("""
         SELECT
             route,
@@ -852,7 +853,7 @@ def get_route_performance_from_db():
             AVG(delay_hours) AS average_delay_hours
         FROM trips
         GROUP BY route
-        ORDER BY average_cost_per_km DESC
+        ORDER BY average_delay_hours DESC
     """).fetchall()
 
     # 关闭数据库连接

@@ -488,3 +488,21 @@ pre {
     line-height: 1.6;
     font-family: Arial, sans-serif;
 }
+
+/* Generated prompt display */
+.rag-prompt {
+    margin-top: 24px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 16px;
+    background-color: #f7f9fc;
+}
+
+.rag-prompt pre {
+    white-space: pre-wrap;
+    font-family: inherit;
+    background-color: #ffffff;
+    border-left: 4px solid #6f42c1;
+    padding: 12px;
+    margin-top: 10px;
+}

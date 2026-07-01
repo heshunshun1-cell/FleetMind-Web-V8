@@ -90,6 +90,17 @@
         </div>
         {% endif %}
 
+        <!-- 显示未来发送给 LLM 的完整 prompt -->
+        {% if generated_prompt %}
+        <div class="rag-prompt">
+            <h2>Generated Prompt</h2>
+            <p class="description">
+                This prompt is prepared for future LLM integration. It combines the user question, knowledge evidence, database context, and answer rules.
+            </p>
+            <pre>{{ generated_prompt }}</pre>
+        </div>
+        {% endif %}
+
         <!-- 返回首页 -->
         <p>
             <a href="/" class="button">Back to Home</a>

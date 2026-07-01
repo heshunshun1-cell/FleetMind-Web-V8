@@ -425,6 +425,7 @@ def rag_assistant():
     answer = None
     sources = []
     results = []
+    generated_prompt = ""
     question = ""
 
     # 如果用户提交问题了，就调用 RAG 引擎生成回答
@@ -437,6 +438,7 @@ def rag_assistant():
             answer = response["answer"]
             sources = response ["sources"]
             results = response["results"]
+            generated_prompt = response["generated_prompt"]
 
     # 把问题，回答和来源传给 rag.html 页面
     return render_template(
@@ -444,8 +446,9 @@ def rag_assistant():
         question=question,
         answer=answer,
         sources=sources,
-        results=results
-    )
+        results=results,
+        generated_prompt=generated_prompt
+        )
 
 
 # 程序入口

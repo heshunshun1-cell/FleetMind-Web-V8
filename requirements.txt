@@ -1,2 +1,9 @@
 Flask
 matplotlib
+openai
+python-dotenv
+sentence-transformers==3.0.1
+torch==2.2.2
+numpy==1.26.4
+scipy==1.13.1
+scikit-learn==1.5.2

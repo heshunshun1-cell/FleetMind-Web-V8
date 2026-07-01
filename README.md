@@ -1,523 +1,244 @@
-````markdown
-# FleetMind Web V7 - Database-Augmented Logistics RAG Assistant
+## V7.6 - Embedding-based Semantic RAG Upgrade
 
-FleetMind Web V7 是我在 FleetMind V1-V6 基础上继续升级的物流数据分析与 RAG 问答系统。
+V7.6 是 FleetMind V7 中非常重要的一次升级。这个版本把原来的 keyword-based RAG 进一步升级为 embedding-based semantic RAG，并且成功接入 LLM API，让系统从“规则型问答工具”进化成更接近真实 AI 应用的 logistics RAG assistant。
 
-这个版本的目标不是简单做一个网页问答工具，而是学习一个真实 AI 应用系统应该如何组织：
-
-- knowledge base 检索
-- SQLite 数据库查询
-- RAG pipeline
-- evidence 展示
-- 数据库上下文组织
-- prompt engineering 前置准备
-- hallucination control 思路
-
-FleetMind V7 目前仍然是本地 lightweight RAG，不依赖外部 LLM API。后续版本会继续接入 LLM，让系统从 rule-based answer generator 升级成 LLM-powered logistics assistant。
-
----
-
-## Project Background
-
-FleetMind 最早来自我的 COMP9001 final project。最开始它只是一个 Python terminal program，用来分析单辆卡车的收入、成本、利润率和风险等级。
-
-随着版本升级，FleetMind 逐渐从一个小型 Python 项目，扩展成一个 Flask + SQLite + analytics + RAG 的物流管理系统。
-
-我希望这个项目能结合我的物流行业背景和计算机学习路径，模拟一个真实企业可能会使用的车队运营分析平台。
-
----
-
-## Version History
-
-### V1 - Terminal Fleet Analysis
-
-最初版本是一个 terminal-based Python program。
-
-主要功能：
-
-- 输入 truck revenue 和 cost
-- 计算 total cost
-- 计算 profit
-- 计算 profit margin
-- 判断 risk level
-- 使用 OOP `Truck` class 封装分析逻辑
-
-这个阶段主要练习了 Python 基础、函数、类和简单业务规则。
-
----
-
-### V2 - Flask Web Version
-
-V2 把 terminal program 升级成 Flask web app。
-
-新增内容：
-
-- Flask routes
-- HTML templates
-- 表单输入
-- 样本车辆展示
-- 单车分析页面
-- 历史记录保存
-
-这个阶段让我第一次理解了 web app 的基本结构：
-
-```text
-app.py
-templates/
-static/
-business logic
-````
-
----
-
-### V3 - Dashboard Version
-
-V3 加入 dashboard 页面，把多辆车的数据做汇总分析。
-
-新增内容：
-
-* truck count
-* total revenue
-* total cost
-* total profit
-* average margin
-* high risk count
-* best/worst truck
-* matplotlib charts
-
-这个阶段开始从单条记录分析，转向整体运营数据分析。
-
----
-
-### V4 - Visualization and UI Improvement
-
-V4 主要增强可视化和页面展示。
-
-新增内容：
-
-* revenue/cost/profit/risk charts
-* dashboard table styling
-* profit/loss color highlighting
-* compare page sorting
-* risk warning display
-
-这个阶段让我意识到，数据分析项目不仅要算得对，也要让用户看得懂。
-
----
-
-### V5 - SQLite Database Version
-
-V5 是一次重要升级：从 CSV/file-based storage 升级到 SQLite database。
-
-新增内容：
-
-* `fleetmind.db`
-* `trucks` table
-* `trips` table
-* `routes` analysis
-* trip-level records
-* CRUD operations
-* analytics page
-* insights page
-* route analytics
-* high delay detection
-* loss-making truck detection
-
-这个阶段让我开始真正接触 database-driven web app。
-
-我学习到：
-
-* SQLite connection
-* SQL SELECT
-* WHERE filtering
-* ORDER BY sorting
-* GROUP BY aggregation
-* Flask + database integration
-* structured data storage
-
----
-
-### V6 - Local RAG Experiment
-
-V6 第一次加入 RAG assistant。
-
-新增内容：
-
-* `knowledge_base/`
-* route notes
-* fleet policy
-* risk rules
-* cost notes
-* keyword-based document retrieval
-* source display
-* simple answer generation
-
-这个阶段的 RAG 还是比较简单，主要是：
+这次升级的目标不是单纯调用大模型，而是学习一个真实 AI 系统背后的完整流程：
 
 ```text
 用户问题
 ↓
-关键词匹配 knowledge_base
+Embedding-based semantic search
 ↓
-返回相关文本
+检索 knowledge_base 证据
 ↓
-生成简单管理建议
-```
+SQLite 数据库查询真实运营数据
+↓
+构建带防幻觉规则的 prompt
+↓
+调用 LLM 生成管理建议
+↓
+如果 LLM 不可用，使用 rule-based fallback
+````
 
-虽然还不是 LLM-powered RAG，但它让我理解了 RAG 的基本思想：
+---
+
+### 1. Embedding-based Semantic Search
+
+在 V6 和 V7 前期版本中，系统主要依赖 keyword matching。也就是说，用户问题和知识库片段必须有相同或相近的关键词，系统才能匹配到相关内容。
+
+例如：
 
 ```text
-retrieval first, answer second
+delay
+delayed
+late
+serious delay
+route delay
+```
+
+这些表达意思接近，但 keyword search 不一定都能稳定匹配。
+
+V7.6 引入了 `sentence-transformers`，使用：
+
+```python
+SentenceTransformer("all-MiniLM-L6-v2")
+```
+
+把用户问题和知识库文本都转换成 embedding 向量。
+
+这个模型会把一句话转换成一个 384 维向量：
+
+```text
+Sentence
+↓
+Embedding Model
+↓
+384-dimensional vector
+```
+
+系统再用 cosine similarity 比较两个向量的语义相似度。
+
+例如：
+
+```text
+"Route B has serious delay problems."
+```
+
+和：
+
+```text
+"Which route often arrives late?"
+```
+
+虽然关键词不完全一样，但 embedding 可以判断它们语义相关。
+
+这让我理解到：
+
+```text
+keyword search 看的是“词是否一样”
+semantic search 看的是“意思是否接近”
 ```
 
 ---
 
-## V7 - Modular Database-Augmented RAG Assistant
+### 2. New Semantic Retriever Module
 
-V7 是目前最重要的一次升级。
-
-V7 的核心目标是把原来比较集中的 RAG 代码拆成更专业的模块，并让 RAG 同时利用：
+V7.6 新增了：
 
 ```text
-knowledge_base evidence
-SQLite database context
+semantic_retriever.py
 ```
 
-也就是说，V7 不只是从文档里找答案，还能从真实数据库里查运营数据。
+这个模块负责：
+
+```text
+1. 读取 knowledge_base 里的 txt 文件
+2. 按空行切分知识片段
+3. 用 SentenceTransformer 生成 embeddings
+4. 用 cosine similarity 计算用户问题和知识片段的相似度
+5. 返回 top_k 个最相关 evidence
+```
+
+核心流程：
+
+```text
+Question
+↓
+query embedding
+↓
+document embeddings
+↓
+cosine similarity
+↓
+top-k evidence
+```
+
+这样 `rag_engine.py` 不再依赖旧的 keyword retriever，而是调用：
+
+```python
+semantic_search(question, top_k=top_k)
+```
+
+这一步让 RAG 的 retrieval quality 明显提升。
 
 ---
 
-## V7 Current Architecture
+### 3. LLM-powered RAG Integration
 
-当前 V7 的核心文件结构：
+V7.6 还接入了 LLM API。
+
+新增或增强的模块包括：
 
 ```text
-document_retriever.py      # knowledge_base 检索
-database_retriever.py      # SQLite 数据库检索
-answer_generator.py        # rule-based 管理建议生成
-rag_engine.py              # RAG 主流程控制
-app.py                     # Flask web routes
-templates/rag.html         # RAG assistant 页面
-knowledge_base/            # 本地知识库
-fleetmind.db               # SQLite 数据库
+prompt_builder.py      # 构建 LLM prompt
+llm_client.py          # 调用 OpenAI API
+rag_engine.py          # 统一调度 semantic search、database retrieval 和 LLM answer
 ```
 
-RAG pipeline：
+新的 RAG 主流程是：
 
 ```text
 User Question
 ↓
-document_retriever.py
-检索 knowledge_base
+semantic_retriever.py
+检索 knowledge_base evidence
 ↓
 database_retriever.py
-检索 SQLite database
+查询 SQLite database context
 ↓
-rag_engine.py
-整合 document evidence 和 database context
+prompt_builder.py
+构建带规则的 prompt
+↓
+llm_client.py
+调用 LLM
 ↓
 answer_generator.py
-生成管理建议
-↓
-rag.html
-展示 answer、sources、retrieved evidence
+作为 fallback
 ```
+
+这个版本保留了 rule-based fallback：
+
+```text
+如果没有 API key
+如果 LLM 调用失败
+如果网络或配置有问题
+```
+
+系统仍然可以返回基本管理建议，而不是直接崩溃。
 
 ---
 
-## V7.1 - RAG Modular Refactor
+### 4. Hallucination Control
 
-V7.1 的目标是把 V6 中比较集中的 `rag_engine.py` 拆成多个模块。
+V7.6 的一个重点是 hallucination control。
 
-完成内容：
-
-* 新建 `document_retriever.py`
-* 新建 `database_retriever.py`
-* 新建 `answer_generator.py`
-* 清理 `rag_engine.py`
-* 让 `rag_engine.py` 只负责主流程调度
-
-重构后：
+在 prompt 中，我加入了明确规则：
 
 ```text
-document_retriever.py
-负责 knowledge_base 读取、切分、检索
-
-database_retriever.py
-负责 SQLite 数据库查询
-
-answer_generator.py
-负责生成回答
-
-rag_engine.py
-负责调用各模块并返回结果
+不要编造 truck ID
+不要编造 trip ID
+不要编造 route name
+不要编造 driver
+不要编造 revenue / cost / profit / delay
+如果数据库没有记录，要明确说明 no records were retrieved
+数据库事实优先于知识库解释
 ```
 
-学习到的新知识：
+这让系统在回答时更加可靠。
 
-* modular programming
-* separation of concerns
-* RAG pipeline structure
-* backend responsibility splitting
+例如用户问：
 
-遇到的挑战：
+```text
+which routes have serious delay problems
+```
 
-一开始 `rag_engine.py` 里什么都放在一起，包括文档读取、chunk 切分、关键词搜索、数据库查询和回答生成。代码能跑，但是结构不清晰，后续很难接 LLM。
+如果数据库没有返回记录，LLM 不能自己编路线。
+如果数据库返回了 route summary，LLM 才能基于真实 `Average Delay Hours` 判断严重路线。
 
-解决方式：
-
-把不同职责拆成独立文件，让每个模块只做一件事。
+这让我理解到：真实 AI 应用不能只追求“回答流畅”，更重要的是回答必须被 evidence 和 database context 支撑。
 
 ---
 
-## V7.2 - Retrieval Quality Improvement
+### 5. Database Retrieval Enhancement
 
-V7.2 的目标是提升 knowledge_base 检索质量。
-
-原来的检索方式比较简单：
+在测试中发现一个问题：
 
 ```text
-用户问题关键词
-↓
-chunk 文本匹配
-↓
-匹配一个词加一分
+which routes have serious delay problems
 ```
 
-问题是：
+一开始没有返回数据库记录。
 
-* `trips` 和 `trip` 不一定能匹配好
-* `delayed` 和 `delay` 不一定能匹配好
-* `expensive` 和 `cost` 没有直接关系
-* `unprofitable` 和 `loss` 没有直接关系
-
-因此 V7.2 增加了轻量级语义增强。
-
-完成内容：
-
-### 1. Keyword Normalization
-
-把不同形式的词统一。
-
-例子：
+原因是 `database_retriever.py` 原本能识别：
 
 ```text
-trips → trip
-trucks → truck
-routes → route
-delayed → delay
+high delay trips
 ```
 
-### 2. Stop Words Filtering
-
-过滤无意义常见词。
-
-例如：
+但不能很好识别：
 
 ```text
-what, which, is, the, should, with, about
+route + delay
 ```
 
-这样系统更关注真正重要的业务词：
+所以 V7.6 增强了 intent detection：
 
 ```text
-delay
-risk
-fuel
-cost
-profit
-route
-truck
-trip
+is_route_question
+is_delay_question
+is_route_delay_question
 ```
 
-### 3. Synonym Expansion
-
-加入简单同义词扩展。
-
-例子：
+这样系统现在可以识别路线层面的延误问题，并返回：
 
 ```text
-late → delay
-expensive → cost / fuel / maintenance
-unprofitable → loss / profit / negative
-dangerous → risk
+Database Result - Route Performance Summary
 ```
 
-### 4. Business Keyword Weighting
-
-业务关键词权重更高。
-
-例如：
+其中包括：
 
 ```text
-delay
-risk
-fuel
-cost
-profit
-loss
-route
-truck
-trip
-```
-
-这些词比普通词更重要，所以匹配到时加更高分数。
-
-### 5. Phrase Matching
-
-加入短语匹配。
-
-例如：
-
-```text
-high delay
-delay risk
-high risk
-fuel cost
-cost per kilometre
-profit margin
-negative profit
-```
-
-如果用户问题和 knowledge_base chunk 同时出现完整短语，就额外加分。
-
-### 6. Evidence Tracking
-
-每条检索结果现在会显示：
-
-```text
-Source
-Score
-Matched Keywords
-Matched Phrases
-Content
-```
-
-这让系统不只是给答案，还能解释：
-
-```text
-为什么这条 evidence 被检索出来？
-```
-
-学习到的新知识：
-
-* keyword normalization
-* stop words
-* synonym expansion
-* scoring mechanism
-* phrase matching
-* evidence tracking
-* retrieval transparency
-
-遇到的挑战：
-
-一开始检索结果虽然能出来，但分数经常都是 1，排序不明显。用户问 `Which routes have high delay risk?` 时，系统不能很好地区分最相关的 chunk。
-
-解决方式：
-
-加入业务关键词权重和短语匹配，让更相关的 evidence 排在前面。
-
----
-
-## V7.3 - Database Retrieval Expansion
-
-V7.3 的目标是让 RAG 不只会查文档，还能根据用户问题查询 SQLite 数据库。
-
-### V7.3.1 High Delay Trips
-
-支持问题：
-
-```text
-Which trips have high delay?
-Which trucks are late?
-What should managers do with delayed trips?
-```
-
-数据库逻辑：
-
-```sql
-WHERE delay_hours >= 24
-ORDER BY delay_hours DESC
-```
-
-系统能返回高延误运输任务。
-
----
-
-### V7.3.2 Loss-Making Trips
-
-支持问题：
-
-```text
-Which trips are unprofitable?
-Which trips are losing money?
-Which trips have negative profit?
-Which trips are loss-making?
-```
-
-数据库逻辑：
-
-```sql
-WHERE profit < 0
-ORDER BY profit ASC
-```
-
-系统能查出亏损运输任务。
-
-例如：
-
-```text
-Route: Chongqing to Shenzhen
-Profit: -4,999.98
-Risk Level: High Risk
-```
-
----
-
-### V7.3.3 High Cost Per Km Trips
-
-支持问题：
-
-```text
-Which trips have high cost per km?
-Which trips are costly?
-Which routes are expensive?
-```
-
-数据库逻辑：
-
-```sql
-ORDER BY cost_per_km DESC
-LIMIT 5
-```
-
-系统能找出每公里成本最高的运输任务。
-
----
-
-### V7.3.4 Route Performance Summary
-
-支持 route-level 汇总分析。
-
-支持问题：
-
-```text
-Which routes are expensive?
-Which routes have high average delay?
-Route performance summary
-Which routes have low profit margin?
-```
-
-数据库逻辑：
-
-```sql
-GROUP BY route
-```
-
-统计内容：
-
-```text
+Route
 Total Trips
 Total Distance
 Total Revenue
@@ -528,421 +249,251 @@ Average Cost Per Km
 Average Delay Hours
 ```
 
-这一步让系统从 trip-level analysis 升级到 route-level analysis。
+同时，`database.py` 中的 route performance query 也从按 cost 排序，优化为按 delay 排序：
+
+```sql
+ORDER BY average_delay_hours DESC
+```
+
+这样当用户问 delay routes 时，系统会优先返回延误最严重的路线。
 
 ---
 
-### V7.3.5 Intent Priority
+## Difficulties and Solutions in V7.6
 
-一开始系统有一个问题：
+### Challenge 1: Python and package compatibility
 
-用户问：
+一开始尝试安装 `sentence-transformers` 和 PyTorch 时，遇到了 Python 版本和依赖兼容问题。
 
-```text
-Which routes are expensive?
-```
-
-可能同时触发：
+特别是：
 
 ```text
-High Cost Per Km Trips
-Route Performance Summary
+numpy
+scipy
+scikit-learn
+torch
+sentence-transformers
 ```
 
-所以 V7.3.5 加入了 intent priority。
-
-规则：
-
-```text
-truck / trucks → truck-level 查询
-trip / trips → trip-level 查询
-route / routes → route-level 查询
-```
-
-这样：
-
-```text
-Which routes are expensive?
-→ Route Performance Summary
-
-Which trips have high cost per km?
-→ High Cost Per Km Trips
-
-What should managers do with high risk trucks?
-→ High Risk Trucks
-```
-
-用到的知识：
-
-* SQL filtering
-* SQL sorting
-* SQL aggregation
-* GROUP BY
-* COUNT()
-* SUM()
-* AVG()
-* intent detection
-* database context generation
-* database-augmented RAG
-
-遇到的挑战：
-
-同一个词可能有不同含义。例如 `expensive` 既可能指单个 trip 成本高，也可能指某条 route 整体成本高。
+之间有版本依赖。
 
 解决方式：
 
-加入 intent priority，根据用户问题中的 `route / trip / truck` 判断查询对象。
+最终使用一套稳定组合：
+
+```text
+Python 3.12.6
+sentence-transformers==3.0.1
+torch==2.2.2
+numpy==1.26.4
+scipy==1.13.1
+scikit-learn==1.5.2
+```
+
+并用：
+
+```bash
+pip check
+```
+
+确认环境没有 broken requirements。
 
 ---
 
-## Current Features
+### Challenge 2: Understanding embeddings and tensors
 
-当前 V7 支持：
-
-### Knowledge Base Retrieval
-
-* route notes retrieval
-* cost notes retrieval
-* fleet policy retrieval
-* risk rules retrieval
-* keyword normalization
-* synonym expansion
-* business keyword scoring
-* phrase matching
-* retrieved evidence display
-
-### Database Retrieval
-
-* high risk trucks
-* high delay trips
-* loss-making trips
-* high cost per km trips
-* route performance summary
-* formatted database context
-* intent priority
-
-### Web Display
-
-`/rag` 页面支持显示：
-
-* user question
-* generated answer
-* database findings
-* knowledge base findings
-* sources
-* retrieved evidence
-* relevance score
-* matched keywords
-* matched phrases
-
----
-
-## Example Questions
+刚开始不理解为什么 embedding shape 是：
 
 ```text
-What should managers do with high risk trucks?
+(3, 384)
 ```
+
+后来理解到：
 
 ```text
-Which trips have high delay?
+3 = 输入了 3 个句子
+384 = all-MiniLM-L6-v2 输出的向量维度
 ```
 
-```text
-Which trips are unprofitable?
-```
-
-```text
-Which trips have high cost per km?
-```
-
-```text
-Which routes are expensive?
-```
-
-```text
-What should we check if fuel cost is high?
-```
-
-```text
-Why is cost per kilometre important?
-```
-
----
-
-## Tech Stack
-
-```text
-Python
-Flask
-SQLite
-HTML
-CSS
-Jinja2
-SQL
-Local RAG
-Rule-based retrieval
-Rule-based answer generation
-```
-
----
-
-## Key Learning Outcomes
-
-通过 V7，我学习了：
-
-```text
-如何把一个 AI assistant 拆成多个后端模块
-如何设计 RAG pipeline
-如何做本地 knowledge base retrieval
-如何用 SQLite 查询真实业务数据
-如何把 database context 加入 RAG
-如何显示 retrieved evidence
-如何设计 scoring mechanism
-如何做 intent detection
-如何为后续 LLM prompt engineering 做准备
-```
-
-这次升级让我理解到，真实 AI 应用不只是调用 API，而是要先解决：
-
-```text
-数据从哪里来
-检索是否准确
-证据是否可靠
-数据库查询是否正确
-回答是否基于上下文
-用户能不能看到来源
-系统是否能避免乱编
-```
-
----
-
-## Challenges and Solutions
-
-### Challenge 1: RAG code was too concentrated
-
-早期 RAG 代码集中在 `rag_engine.py` 里，功能混杂。
-
-Solution:
-
-拆分成：
-
-```text
-document_retriever.py
-database_retriever.py
-answer_generator.py
-rag_engine.py
-```
-
----
-
-### Challenge 2: Keyword matching was too simple
-
-原来的检索只会简单匹配关键词。
-
-Solution:
-
-加入：
-
-```text
-normalization
-stop words
-synonym expansion
-business keyword weighting
-phrase matching
-```
-
----
-
-### Challenge 3: Retrieval results were hard to explain
-
-一开始系统只返回答案和 sources，但看不出为什么这些内容被选中。
-
-Solution:
-
-加入：
-
-```text
-matched_keywords
-matched_phrases
-score
-retrieved evidence display
-```
-
----
-
-### Challenge 4: Database retrieval only supported one query type
-
-最开始只支持 high risk trucks。
-
-Solution:
-
-扩展到：
-
-```text
-high delay trips
-loss-making trips
-high cost per km trips
-route performance summary
-```
-
----
-
-### Challenge 5: Multiple intents could be triggered at the same time
+也学习到 PyTorch tensor 是深度学习中保存数值数据的格式。
 
 例如：
 
 ```text
-Which routes are expensive?
+tensor([[0.5614]])
 ```
 
-可能同时触发 trip-level 和 route-level 查询。
+表示两个句子的语义相似度。
 
-Solution:
+---
 
-加入 intent priority：
+### Challenge 3: Semantic search indexing bug
+
+在 `semantic_retriever.py` 中，曾经错误写成：
+
+```python
+document_embeddings[0]
+```
+
+这会导致系统只拿第一个文档向量做相似度计算，后面 `topk` 取多个结果时出现：
 
 ```text
-truck → truck-level
-trip → trip-level
-route → route-level
+RuntimeError: selected index k out of range
+```
+
+解决方式：
+
+改成：
+
+```python
+similarities = util.cos_sim(query_embedding, document_embeddings)[0]
+```
+
+这样系统会比较用户问题和所有知识片段，而不是只比较第一个。
+
+---
+
+### Challenge 4: Missing LLM dependencies
+
+运行 `rag_engine.py` 时，遇到：
+
+```text
+No module named 'dotenv'
+No module named 'openai'
+```
+
+解决方式：
+
+安装并加入 `requirements.txt`：
+
+```text
+python-dotenv
+openai
+```
+
+这让我理解到：
+
+```text
+python-dotenv 负责读取 .env
+openai 负责调用 LLM API
+.env 用来安全保存 API key
 ```
 
 ---
 
-## Current Project Level
+### Challenge 5: Route delay question could not retrieve database context
 
-FleetMind V7 目前已经不只是一个普通 Flask CRUD 项目。
-
-它包含：
+系统一开始能回答：
 
 ```text
-Web development
-Database analytics
-Business rule design
-Local RAG pipeline
-Evidence tracking
-Intent detection
-Logistics domain modeling
+what should we do with high delay trips
 ```
 
-这个项目可以作为一个 AI application / data analytics / backend learning project 写进简历，尤其适合展示：
+但不能很好回答：
 
 ```text
-AI + logistics
-RAG system design
-database-augmented assistant
-business-oriented analytics
+which routes have serious delay problems
+```
+
+原因是数据库检索器没有识别 route-level delay intent。
+
+解决方式：
+
+增强 `database_retriever.py` 的问题判断逻辑，并让 route performance summary 支持 delay 类问题。
+
+最终系统可以基于真实数据库返回：
+
+```text
+Chongqing to Berlin: 30.00 average delay hours
+Chongqing to Davis: 25.00 average delay hours
+Chongqing to Shenzhen: 8.00 average delay hours
 ```
 
 ---
 
-## Future Improvements
+## Updated V7.6 Architecture
 
-接下来计划进入 V7.4 和 V7.5。
-
-### V7.4 Prompt Builder
-
-新增：
+当前 V7.6 的整体框架：
 
 ```text
+app.py
+Flask web routes
+↓
+rag_engine.py
+RAG 主流程控制
+↓
+semantic_retriever.py
+Embedding-based knowledge base retrieval
+↓
+database_retriever.py
+SQLite database context retrieval
+↓
 prompt_builder.py
+Prompt construction + hallucination control rules
+↓
+llm_client.py
+LLM API call
+↓
+answer_generator.py
+Rule-based fallback
+↓
+templates/rag.html
+展示 answer、sources、database context、retrieved evidence
 ```
 
-目标是把以下内容组织成 LLM prompt：
+核心文件：
 
 ```text
-user question
-knowledge base evidence
-database context
-answer rules
-hallucination control rules
+semantic_retriever.py      # 语义检索
+embedding_test.py          # embedding 学习测试文件
+rag_engine.py              # RAG 总调度
+database_retriever.py      # 数据库检索
+database.py                # SQL 查询函数
+prompt_builder.py          # prompt 构建
+llm_client.py              # LLM API 调用
+answer_generator.py        # fallback 回答生成
+knowledge_base/            # 本地知识库
+fleetmind.db               # SQLite 数据库
 ```
 
 ---
 
-### V7.5 LLM API Integration
+## What I Learned in V7.6
 
-后续会接入 LLM API，让系统从 rule-based answer generator 升级为：
-
-```text
-LLM-powered logistics RAG assistant
-```
-
-但仍然保留 fallback：
+通过 V7.6，我学习了：
 
 ```text
-如果 LLM API 不可用，仍然使用 rule-based answer
+SentenceTransformer 如何生成 embeddings
+384-dimensional sentence embedding 的含义
+cosine similarity 如何衡量语义相似度
+PyTorch tensor 的基本概念
+semantic search 和 keyword search 的区别
+如何把 semantic retriever 接入 RAG pipeline
+如何用 SQLite database context 增强 LLM 回答
+如何构建带 hallucination control 的 prompt
+如何使用 .env 管理 API key
+如何保留 rule-based fallback 提高系统稳定性
+如何处理 Python AI package dependency conflicts
 ```
+
+这次升级让我更清楚地理解了：
+一个真实的 AI assistant 不只是调用大模型，而是由检索、数据库、prompt、模型调用、fallback 和证据控制共同组成的系统。
 
 ---
 
-### V7.6 UI and README Polish
+## V7.6 Project Value
 
-后续优化：
+V7.6 让 FleetMind 从普通 Flask + SQLite 项目，升级成了一个更完整的 AI application prototype。
 
-```text
-example questions
-better evidence cards
-database context display
-screenshots
-English README
-project architecture diagram
-```
-
----
-
-## How to Run
-
-Install dependencies:
-
-```bash
-pip install -r requirements.txt
-```
-
-Initialize database if needed:
-
-```bash
-python3 init_db.py
-```
-
-Run Flask app:
-
-```bash
-python3 app.py
-```
-
-Open in browser:
+它现在具备：
 
 ```text
-http://127.0.0.1:5001
+Embedding-based semantic retrieval
+Database-augmented RAG
+LLM-powered answer generation
+Hallucination control
+Rule-based fallback
+Logistics domain knowledge base
+SQLite operational analytics
+Route-level and trip-level business reasoning
 ```
-
-RAG assistant page:
-
-```text
-http://127.0.0.1:5001/rag
-```
-
----
-
-## Project Reflection
-
-FleetMind V7 是我从 Python beginner project 逐步升级出来的项目。
-
-它不是一开始就设计得很完整，而是在每个版本里逐步发现问题、修复问题、学习新知识。
-
-从 V1 的单车利润计算，到 V5 的 SQLite 数据库，再到 V7 的 database-augmented RAG，我逐渐理解了一个真实 AI 应用不仅需要模型，还需要：
-
-```text
-清晰的数据结构
-可靠的数据库查询
-合理的检索逻辑
-可解释的 evidence
-稳定的后端模块
-面向业务的回答方式
-```
-
-这个过程让我对 AI application engineering 有了更具体的理解，也让我看到自己可以把物流行业经验和计算机技术结合起来，做出更接近真实业务场景的系统。
-
-````
-
