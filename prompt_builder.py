@@ -58,43 +58,52 @@ Database Context:
 {database_evidence}
 
 Answer Requirements:
-1. Answer the user question using only the provided Knowledge Base Evidence and Database Context.
-2. Separate factual findings from management recommendations.
-3. Prioritise Database Context when the question asks about actual trucks, trips, routes, costs, profit, delay, or risk.
-4. Use Knowledge Base Evidence to explain policies, rules, and management reasoning.
-5. Keep the answer concise, practical, and suitable for logistics managers.
+1. You must answer using ONLY the provided Knowledge Base Evidence and Database Context.
+2. You must return ONLY valid JSON.
+3. Do not include markdown, bullet points, explanations outside JSON, or code fences.
+4. Prefer Database Context for factual operational claims.
+5. Use Knowledge Base Evidence only for policies, rules, and management reasoning.
+6. Keep the answer concise, practical, and easy to scan.
 
 Hallucination Control Rules:
 1. Do not invent truck IDs, trip IDs, route names, drivers, dates, revenue, costs, profits, margins, delay hours, or risk levels.
-2. If a truck, trip, or route is not shown in the Database Context, do not claim it exists.
-3. If Database Context says no records were found, clearly state that no related database records were retrieved.
-4. If Knowledge Base Evidence is missing or weak, clearly state that the knowledge evidence is limited.
-5. If the answer requires data that is not provided, say that more data is needed instead of guessing.
-6. Treat Database Context as factual operational data and Knowledge Base Evidence as policy or reasoning support.
-7. If Knowledge Base Evidence and Database Context appear to conflict, prioritise Database Context for factual claims.
+2. If a truck, trip, route, or cost item is not shown in the Database Context, do not claim it exists.
+3. If Database Context says no related records were retrieved, clearly state that no related database records were found.
+4. If Knowledge Base Evidence is missing or weak, clearly state that the policy evidence is limited.
+5. If Database Context and Knowledge Base Evidence conflict, prioritize Database Context for factual claims.
+6. If the question requires data that is not provided, say that more data is needed instead of guessing.
 
-Required Answer Structure:
-1. Direct Answer
-   - Answer the user's question directly in one or two sentences.
+JSON Output Schema:
+Return exactly one JSON object with the following keys:
 
-2. Key Operational Findings
-   - Summarise the most relevant database records, such as trucks, trips, routes, costs, profit, delay, or risk level.
-   - If no database records were retrieved, clearly state that no related database records were found.
+{{
+  "short_answer": "Answer the user's question directly in 1-2 short sentences.",
+  "data_status": "sufficient | limited | missing",
+  "key_evidence": [
+    "Evidence point 1. Prefer database evidence if available.",
+    "Evidence point 2. Use policy evidence if database evidence is missing.",
+    "Evidence point 3. Keep each evidence point short."
+  ],
+  "recommended_actions": [
+    "Action 1. Keep it practical and specific.",
+    "Action 2. Keep it short.",
+    "Action 3. Do not exceed three actions."
+  ],
+  "limitation": "State missing or limited data in one short sentence."
+}}
 
-3. Risk or Cost Explanation
-   - Explain the operational meaning of the findings using the knowledge base evidence.
-   - Do not introduce facts that are not present in the evidence.
-
-4. Recommended Actions
-   - Give practical management actions based on the retrieved evidence and database context.
-   - Recommendations should be specific, realistic, and suitable for logistics managers.
-
-5. Data Limitations
-   - State what information is missing or limited.
-   - If the answer is based only on limited evidence, clearly mention this.
-""".strip()
+Strict JSON Rules:
+1. Return valid JSON only.
+2. Use double quotes for all keys and string values.
+3. Do not add any text before or after the JSON object.
+4. Do not wrap the JSON in markdown or code blocks.
+5. The key_evidence array must contain at most 3 items.
+6. The recommended_actions array must contain at most 3 items.
+7. The data_status value must be one of: "sufficient", "limited", or "missing".
+8. If there is no database evidence, set data_status to "missing" or "limited" and explain this in limitation.
+"""
     
-    return prompt
+    return prompt.strip()
 
 # 单独运行本文件时，用于测试 prompt 生成效果
 if __name__ == "__main__":

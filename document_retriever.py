@@ -1,8 +1,11 @@
 import os
 import re
 
-# 知识库文件夹路径
-KNOWLEDGE_BASE_DIR = "knowledge_base"
+# 导入项目统一配置
+from config import Config
+
+# 从配置中读取知识库文件夹路径
+KNOWLEDGE_BASE_DIR = Config.KNOWLEDGE_BASE_PATH
 
 
 # 停用词：这些词太常见，对检索帮助不大

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>FleetMind Dashboard</title>
+
+    <!-- 引入 CSS 样式文件 -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <!-- Dashboard 主容器 -->
+    <div class="container">
+
+        <!-- 页面标题 -->
+        <h1>FleetMind Fleet Operations Dashboard</h1>
+        <p class="subtitle">
+            This dashboard summarises saved truck records from the FleetMind SQLite database.
+        </p>
+
+        <!-- 数据来源说明 -->
+    <div class="info-box">
+         <h3>Data Source</h3>
+         <p>
+            This dashboard calculates fleet performance from records stored in the FleetMind SQLite database.
+        </p>
+    </div>
+
+        <!-- Dashboard 指标卡片区域 -->
+        <div class="dashboard-grid">
+
+            <!-- 车辆总数 -->
+            <div class="dashboard-card">
+                <h3>Truck Count</h3>
+                <p>{{ data.truck_count }}</p>
+            </div>
+
+            <!-- 总收入 -->
+            <div class="dashboard-card">
+                <h3>Total Revenue</h3>
+                <p>${{ "{:,.0f}".format(data.total_revenue) }}</p>
+            </div>
+
+            <!-- 总成本 -->
+            <div class="dashboard-card">
+                <h3>Total Cost</h3>
+                <p>${{ "{:,.0f}".format(data.total_cost) }}</p>
+            </div>
+
+            <!-- 总利润 -->
+            <div class="dashboard-card">
+                 <h3>Total Profit</h3>
+
+                 {% if data.total_profit >= 0 %}
+                 <p class="profit-positive">${{ "{:,.0f}".format(data.total_profit) }}</p>
+                 {% else %}
+                 <p class="profit-negative">${{ "{:,.0f}".format(data.total_profit) }}</p>
+                 {% endif %}
+            </div>
+
+            <!-- 平均利润率 -->
+            <div class="dashboard-card">
+                <h3>Average Profit Margin</h3>
+
+                {% if data.average_profit_margin >= 25 %}
+                <p class="profit-positive">{{ "%.2f"|format(data.average_profit_margin) }}%</p>
+                {% elif data.average_profit_margin >= 15 %}
+                <p class="risk-normal-text">{{ "%.2f"|format(data.average_profit_margin) }}%</p>
+                {% elif data.average_profit_margin >= 5 %}
+                <p class="risk-warning-text">{{ "%.2f"|format(data.average_profit_margin) }}%</p>
+                {% else %}
+                <p class="profit-negative">{{ "%.2f"|format(data.average_profit_margin) }}%</p>
+                {% endif %}
+            </div>
+
+            <!-- 高风险车辆数量 -->
+            <div class="dashboard-card">
+                <h3>High Risk Trucks</h3>
+
+                {% if data.high_risk_count == 0 %}
+                <p class="profit-positive">{{ data.high_risk_count }}</p>
+                {% else %}
+                <p class="profit-negative">{{ data.high_risk_count }}</p>
+                {% endif %}
+            </div>
+
+            <!-- 表现最好的车辆 -->
+            <div class="dashboard-card">
+                <h3>Best Performing Truck</h3>
+
+                {% if data.best_truck %}
+                    <p>{{ data.best_truck.truck_id }}</p>
+                    <small>{{ "%.2f"|format(data.best_truck.profit_margin|float) }}% margin</small>
+                {% else %}
+                    <p>No data</p>
+                {% endif %}
+            </div>
+
+            <!-- 表现最差的车辆 -->
+            <div class="dashboard-card">
+                <h3>Lowest Margin Truck</h3>
+
+                {% if data.worst_truck %}
+                    <p>{{ data.worst_truck.truck_id }}</p>
+                    <small>{{ "%.2f"|format(data.worst_truck.profit_margin|float) }}% margin</small>
+                {% else %}
+                    <p>No data</p>
+                {% endif %}
+            </div>
+
+            <!-- 最常见成本压力 -->
+            <div class="dashboard-card">
+                <h3>Most Common Cost Pressure</h3>
+                <p>{{ data.most_common_cost_pressure }}</p>
+            </div>
+
+        </div>
+
+        <!-- 页面导航按钮 -->
+        <div class="nav-buttons">
+            <a href="/records">View Records</a>
+            <a href="/new-truck">Analyse Another Truck</a>
+            <a href="/">Back Home</a>
+        </div>
+
+    </div>
+</body>
+</html>

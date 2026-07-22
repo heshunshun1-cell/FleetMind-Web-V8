@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add New Trip</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <div class="container">
+        <h1>Add New Trip</h1>
+
+        <p class="description">
+            Enter a new transportation trip record. FleetMind will calculate profit,
+            profit margin, cost per kilometre, and risk level automatically.
+        </p>
+
+        <!-- 新增 trip 表单 -->
+        <form method="POST" action="/add-trip">
+            <label>Trip ID</label>
+            <input type="text" name="trip_id" placeholder="Example: TRIP007" required>
+
+            <label>Truck ID</label>
+            <select name="truck_id" required>
+                <option value="">Select an existing truck</option>
+                {% for truck in trucks %}
+                    <option value="{{ truck['truck_id'] }}">
+                        {{ truck['truck_id'] }} - {{ truck['driver'] }} - {{ truck['route'] }}
+                    </option>
+                {% endfor %}
+            </select>
+
+            <label>Driver</label>
+            <input type="text" name="driver" placeholder="Example: Zhang Wei" required>
+
+            <label>Route</label>
+            <input type="text" name="route" placeholder="Example: Chongqing to Sydney" required>
+
+            <label>Distance (km)</label>
+            <input type="number" name="distance" step="0.1" placeholder="Example: 8500" required>
+
+            <label>Revenue ($)</label>
+            <input type="number" name="revenue" step="0.01" placeholder="Example: 235000" required>
+
+            <label>Total Cost ($)</label>
+            <input type="number" name="total_cost" step="0.01" placeholder="Example: 138000" required>
+
+            <label>Delay Hours</label>
+            <input type="number" name="delay_hours" step="0.1" placeholder="Example: 7" required>
+
+            <label>Trip Date</label>
+            <input type="date" name="trip_date" required>
+
+            <!-- 提交按钮 -->
+            <button type="submit" class="button">Save Trip</button>
+        </form>
+
+        <!-- 页面导航按钮 -->
+        <div class="button-group">
+            <a href="/" class="button">Back to Home</a>
+            <a href="/trips" class="button">View Trip Records</a>
+            <a href="/route-analytics" class="button">View Route Analytics</a>
+        </div>
+    </div>
+</body>
+</html>

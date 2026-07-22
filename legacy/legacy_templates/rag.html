@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <!-- 网页标题 -->
+    <title>FleetMind RAG Assistant</title>
+
+    <!-- 连接 CSS 样式文件 -->
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+    <div class="container">
+
+        <!-- 页面标题 -->
+        <h1>FleetMind RAG Assistant</h1>
+
+        <!-- 页面说明 -->
+        <p class="description">
+            Ask questions about fleet policy, route notes, cost issues, and risk rules.
+        </p>
+
+        <!-- RAG 问答表单：用户输入问题 -->
+        <form method="POST" class="rag-form">
+            <label for="question">Your Question</label>
+
+            <!-- name="question" 要和 app.py 里的 request.form.get("question") 对应 -->
+            <textarea
+                id="question"
+                name="question"
+                rows="4"
+                placeholder="Example: what should we do with high delay trips?"
+            >{{ question }}</textarea>
+
+            <!-- 提交问题 -->
+            <button type="submit">Ask Assistant</button>
+        </form>
+
+        <!-- 如果 JSON 解析成功，就用结构化卡片展示回答 -->
+        {% if structured_answer %}
+        <div class="rag-answer">
+            <h2>Answer</h2>
+
+            <!-- 简短回答 -->
+            <h3>Short Answer</h3>
+            <p>{{ structured_answer.short_answer }}</p>
+
+            <!-- 数据状态 -->
+            <h3>Data Status</h3>
+            <p>{{ structured_answer.data_status }}</p>
+
+            <!-- 关键证据 -->
+            <h3>Key Evidence</h3>
+            <ul>
+                {% for item in structured_answer.key_evidence %}
+                <li>{{ item }}</li>
+                {% endfor %}
+            </ul>
+
+            <!-- 建议行动 -->
+            <h3>Recommended Actions</h3>
+            <ul>
+                {% for action in structured_answer.recommended_actions %}
+                <li>{{ action }}</li>
+                {% endfor %}
+            </ul>
+
+            <!-- 数据限制 -->
+            <h3>Limitation</h3>
+            <p>{{ structured_answer.limitation }}</p>
+        </div>
+
+        <!-- 如果 JSON 解析失败，就保留原始文本作为 fallback -->
+        {% elif answer %}
+        <div class="rag-answer">
+            <h2>Answer</h2>
+            <pre>{{ answer }}</pre>
+        </div>
+        {% endif %}
+
+        <!-- 如果有来源文件，就显示 sources -->
+        {% if sources %}
+        <div class="rag-sources">
+            <h2>Sources</h2>
+            <ul>
+                {% for source in sources %}
+                <li>{{ source }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        <!-- 如果有检索结果，就显示 RAG evidence -->
+        {% if results %}
+        <div class="rag-evidence">
+            <h2>Retrieved Evidence</h2>
+
+            {% for result in results %}
+            <div class="evidence-card">
+                <p><strong>Source:</strong> {{ result.source }}</p>
+                <p><strong>Score:</strong> {{ result.score }}</p>
+
+                <p>
+                    <strong>Matched Keywords:</strong>
+                    {% if result.matched_keywords %}
+                        {{ result.matched_keywords | join(", ") }}
+                    {% else %}
+                        None
+                    {% endif %}
+                </p>
+
+                <p>
+                    <strong>Matched Phrases:</strong>
+                    {% if result.matched_phrases %}
+                        {{ result.matched_phrases | join(", ") }}
+                    {% else %}
+                        None
+                    {% endif %}
+                </p>
+
+                <p><strong>Content:</strong></p>
+                <pre>{{ result.content }}</pre>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- 显示未来发送给 LLM 的完整 prompt -->
+        {% if generated_prompt %}
+        <div class="rag-prompt">
+            <h2>Generated Prompt</h2>
+            <p class="description">
+                This prompt is prepared for future LLM integration. It combines the user question, knowledge evidence, database context, and answer rules.
+            </p>
+            <pre>{{ generated_prompt }}</pre>
+        </div>
+        {% endif %}
+
+        <!-- 返回首页 -->
+        <p>
+            <a href="/" class="button">Back to Home</a>
+        </p>
+
+    </div>
+</body>
+</html>

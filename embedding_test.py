@@ -1,9 +1,11 @@
 from sentence_transformers import SentenceTransformer, util
 
+# 导入项目统一配置
+from config import Config
 
-# 加载一个轻量级 embedding 模型
+# 使用项目统一配置中的 Embedding 模型
 # 它可以把英文句子转换成数字向量
-model = SentenceTransformer("all-MiniLM-L6-v2")
+model = SentenceTransformer(Config.EMBEDDING_MODEL_NAME)
 
 
 # 准备三句测试文本

@@ -1,7 +1,9 @@
 import sqlite3
 
-# 数据库文件名
-DB_NAME = "fleetmind.db"
+from config import Config
+
+# 从统一配置中读取数据库路径
+DB_NAME = Config.DATABASE_PATH
 
 def get_db_connection():
     """连接 SQLite 数据库"""

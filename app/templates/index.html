@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <!-- 网页标题，会显示在浏览器标签页上 -->
+    <title>FleetMind AI Logistics Assistant</title>
+
+    <!-- 连接 static 文件夹里的 CSS 样式文件 -->
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+    <div class="container">
+
+        <!-- 项目主标题 -->
+        <h1>FleetMind</h1>
+
+        <!-- 项目副标题 -->
+        <h2>AI Logistics Assistant</h2>
+
+        <!-- 项目简介：用学生口吻说明项目来源和用途 -->
+        <p>
+            FleetMind is a small logistics analysis web app inspired by my experience with freight operations.
+            I built it to help understand truck revenue, operating costs, profit margin, risk level,
+            and the main cost pressure in a simple and clear way.
+        </p>
+
+        <!-- 首页菜单：对应不同功能页面 -->
+        <div class="menu">
+            <!-- 查看车队 Dashboard 总览 -->
+            <a href="/dashboard" class="button">View Fleet Dashboard</a>
+
+            <!-- 查看车队 Analytics 数据分析 -->
+            <a href="/analytics" class="button">View Fleet Analytics</a>
+
+            <!-- 查看运营建议 -->
+            <a href="/insights" class="button">View Operational Insights</a>
+
+            <!-- 查看路线分析页面 -->
+            <a href="/route-analytics" class="button">View Route Analytics</a>
+
+            <!-- 查看车辆记录 -->
+            <a href="/records" class="button">View Truck Records</a>
+
+            <!-- 查看运输任务记录 -->
+            <a href="/trips" class="button">View Trip Records</a>
+
+            <!-- 新增一条运输任务 -->
+            <a href="/add-trip" class="button">Add New Trip</a>
+
+            <!-- 进入 RAG 知识库问答助手 -->
+            <a href="/rag" class="button">Ask RAG Assistant</a>
+
+        </div>
+
+        <!-- 项目信息说明 -->
+        <div class="info-box">
+            <h3>Project Information</h3>
+
+            <p>
+                This project is based on realistic logistics scenarios, but all sample data has been anonymised
+                and modified for privacy protection. It does not include real company names, driver names,
+                plate numbers, clients, or private routes.
+            </p>
+        </div>
+
+    </div>
+</body>
+</html>

@@ -1,0 +1,508 @@
+/* 整体页面样式 */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f6f8;
+    margin: 0;
+    padding: 0;
+    color: #222;
+}
+
+/* 主体内容容器 */
+.container {
+    width: 85%;
+    max-width: 1100px;
+    margin: 40px auto;
+    background-color: white;
+    padding: 30px;
+    border-radius: 14px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+}
+
+/* 主标题 */
+h1 {
+    text-align: center;
+    color: #1f3c88;
+    margin-bottom: 10px;
+}
+
+/* 副标题 */
+h2 {
+    color: #333;
+    margin-top: 20px;
+}
+
+/* 小标题 */
+h3 {
+    color: #1f3c88;
+}
+
+/* 普通段落 */
+p {
+    line-height: 1.6;
+}
+
+/* 首页菜单和页面底部按钮区域 */
+.menu {
+    margin-top: 25px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+/* 按钮样式 */
+.button {
+    display: inline-block;
+    background-color: #1f3c88;
+    color: white;
+    padding: 11px 16px;
+    border-radius: 8px;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    font-size: 15px;
+}
+
+/* 鼠标放到按钮上时的效果 */
+.button:hover {
+    background-color: #162c63;
+}
+
+/* 返回链接 */
+.back-link {
+    display: inline-block;
+    margin-top: 25px;
+    color: #1f3c88;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+/* 卡片样式，用于车辆信息、分析结果等 */
+.card {
+    background-color: #f9fafc;
+    padding: 20px;
+    border-radius: 12px;
+    margin-top: 20px;
+    border: 1px solid #e2e6ea;
+}
+
+/* 项目信息说明框 */
+.info-box {
+    background-color: #eef3ff;
+    padding: 18px;
+    border-radius: 12px;
+    margin-top: 25px;
+    border-left: 5px solid #1f3c88;
+}
+
+/* 样本车辆列表 */
+.truck-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 18px;
+    margin-top: 20px;
+}
+
+/* 表单标签 */
+label {
+    display: block;
+    margin-top: 14px;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+/* 输入框 */
+input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #cfd6df;
+    border-radius: 8px;
+    font-size: 15px;
+    box-sizing: border-box;
+}
+
+/* 表格整体 */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    font-size: 14px;
+}
+
+/* 表头和单元格 */
+th, td {
+    border: 1px solid #d9dee5;
+    padding: 10px;
+    text-align: left;
+}
+
+/* 表头背景 */
+th {
+    background-color: #1f3c88;
+    color: white;
+}
+
+/* 表格偶数行背景 */
+tr:nth-child(even) {
+    background-color: #f4f6f8;
+}
+
+/* 历史记录文本 */
+pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    line-height: 1.6;
+    font-family: Arial, sans-serif;
+}
+
+/* 成功提示 */
+.success-message {
+    background-color: #e6f6ea;
+    color: #1f7a3f;
+    padding: 12px;
+    border-radius: 8px;
+    border-left: 5px solid #1f7a3f;
+}
+
+/* 警告提示 */
+.warning-message {
+    background-color: #fff3cd;
+    color: #856404;
+    padding: 12px;
+    border-radius: 8px;
+    border-left: 5px solid #856404;
+}
+
+/* 风险等级标签的基础样式 */
+.risk-badge {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 999px;
+    font-weight: bold;
+    font-size: 13px;
+}
+
+/* Excellent：绿色，表示表现优秀 */
+.risk-excellent {
+    background-color: #e6f6ea;
+    color: #1f7a3f;
+}
+
+/* Normal：蓝色，表示正常 */
+.risk-normal {
+    background-color: #e8f0ff;
+    color: #1f3c88;
+}
+
+/* Warning：橙色，表示需要注意 */
+.risk-warning {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+/* High Risk：红色，表示高风险 */
+.risk-high {
+    background-color: #fdecea;
+    color: #b42318;
+}
+
+/* 利润为正： 绿色 */
+.profit-positive {
+    color: #1f7a3f;
+    font-weight: bold;
+}
+
+/* 利润为负：红色 */
+.profit-negative {
+    color: #b42318;
+    font-weight: bold;
+}
+
+/* FleetMind 建议卡片 */
+.suggestion-box {
+    background-color: #f0f6ff;
+    border-left: 5px solid #1f3c88;
+    padding: 16px;
+    border-radius: 10px;
+    margin-top: 12px;
+}
+
+/* 建议卡片标题 */
+.suggestion-title {
+    font-weight: bold;
+    color: #1f3c88;
+    margin-bottom: 8px;
+}
+
+/* 建议正文 */
+.suggestion-text {
+    line-height: 1.7;
+    margin: 0;
+}
+
+
+/* Dashboard 卡片网格布局 */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+    margin-top: 30px;
+}
+
+/* Dashboard 专用卡片，避免影响其他页面 */
+.dashboard-card {
+    background-color: white;
+    padding: 22px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    text-align: center;
+}
+
+/* Dashboard 卡片标题 */
+.dashboard-card h3 {
+    margin-bottom: 12px;
+    color: #555;
+}
+
+/* Dashboard 卡片数字 */
+.dashboard-card p {
+    font-size: 24px;
+    font-weight: bold;
+    color: #1f4e79;
+}
+
+/* 横跨整行的大卡片 */
+.wide-card {
+    grid-column: span 3;
+}
+
+/* 页面底部按钮区域 */
+.nav-buttons {
+    margin-top: 30px;
+}
+
+/* 页面底部按钮 */
+.nav-buttons a {
+    display: inline-block;
+    margin-right: 12px;
+    padding: 10px 16px;
+    background-color: #1f4e79;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+}
+
+/* Dashboard 风险文字颜色 */
+.risk-normal-text {
+    color: #1f4e79;
+    font-weight: bold;
+}
+
+.risk-warning-text {
+    color: #d68910;
+    font-weight: bold;
+}
+
+/* Dashboard 指标颜色覆盖 */
+.dashboard-card p.profit-positive {
+    color: #1f8f4d;
+    font-weight: bold;
+}
+
+.dashboard-card p.profit-negative {
+    color: #c0392b;
+    font-weight: bold;
+}
+
+.dashboard-card p.risk-normal-text {
+    color: #1f4e79;
+    font-weight: bold;
+}
+
+.dashboard-card p.risk-warning-text {
+    color: #d68910;
+    font-weight: bold;
+}
+
+/* Analytics summary cards */
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+    margin: 25px 0;
+}
+
+.summary-grid .card {
+    text-align: center;
+    padding: 20px;
+}
+
+.summary-grid .card h3 {
+    margin-bottom: 10px;
+    color: #12316b;
+}
+
+.summary-grid .card p {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+/* Value colors for analytics */
+.positive-value {
+    color: #1f7a3f;
+    font-weight: bold;
+}
+
+.negative-value {
+    color: #b42318;
+    font-weight: bold;
+}
+
+.normal-value {
+    color: #12316b;
+    font-weight: bold;
+}
+
+/* Loss-making truck warning card */
+.loss-item {
+    border-left: 5px solid #b42318;
+    background-color: #fff5f5;
+    padding: 15px;
+    margin-top: 15px;
+    border-radius: 8px;
+}
+
+.loss-item h3 {
+    color: #b42318;
+}
+
+.loss-item p {
+    margin: 6px 0;
+}
+
+/* ===== Insights Page ===== */
+
+.insight-summary-box {
+    background: #f3f7ff;
+    border-left: 5px solid #123c7c;
+    padding: 18px 22px;
+    margin: 25px 0;
+    border-radius: 10px;
+}
+
+.insight-summary-box h2 {
+    margin-top: 0;
+    color: #123c7c;
+    font-size: 22px;
+}
+
+.insight-summary-box p {
+    margin-bottom: 0;
+    line-height: 1.6;
+    color: #333;
+}
+
+.insight-list {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 18px;
+    margin-top: 25px;
+}
+
+.insight-card {
+    background: #ffffff;
+    border-left: 6px solid #123c7c;
+    padding: 18px 22px;
+    border-radius: 12px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+}
+
+.insight-card:hover {
+    transform: translateY(-2px);
+    transition: 0.2s ease;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.10);
+}
+
+.insight-header {
+    font-weight: bold;
+    color: #123c7c;
+    margin-bottom: 8px;
+    font-size: 17px;
+}
+
+.insight-card p {
+    margin: 0;
+    line-height: 1.6;
+    color: #333;
+}
+
+/* RAG 问答页面整体表单 */
+.rag-form {
+    background: white;
+    padding: 24px;
+    border-radius: 10px;
+    margin-top: 20px;
+    margin-bottom: 24px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+/* RAG 问题输入框 */
+.rag-form textarea {
+    width: 100%;
+    margin-top: 10px;
+    padding: 12px;
+    font-size: 16px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    resize: vertical;
+}
+
+/* RAG 提交按钮 */
+.rag-form button {
+    margin-top: 14px;
+    padding: 10px 18px;
+    background-color: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+/* RAG 按钮悬停效果 */
+.rag-form button:hover {
+    background-color: #1d4ed8;
+}
+
+/* RAG 回答和来源区域 */
+.rag-answer,
+.rag-sources {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    margin-top: 18px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+/* 保留 RAG 回答里的换行格式 */
+.rag-answer pre {
+    white-space: pre-wrap;
+    line-height: 1.6;
+    font-family: Arial, sans-serif;
+}
+
+/* Generated prompt display */
+.rag-prompt {
+    margin-top: 24px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 16px;
+    background-color: #f7f9fc;
+}
+
+.rag-prompt pre {
+    white-space: pre-wrap;
+    font-family: inherit;
+    background-color: #ffffff;
+    border-left: 4px solid #6f42c1;
+    padding: 12px;
+    margin-top: 10px;
+}

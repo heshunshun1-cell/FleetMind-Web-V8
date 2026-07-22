@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>FleetMind Insights</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <div class="container">
+        <h1>FleetMind Operational Insights</h1>
+
+        <p class="description">
+            This page generates rule-based operational insights from records stored in the
+            <strong>FleetMind SQLite database</strong>.
+        </p>
+
+        <div class="insight-summary-box">
+            <h2>Decision Support Summary</h2>
+            <p>
+                FleetMind automatically reviews profit, risk level, and cost pressure to help identify
+                trucks that may need management attention.
+            </p>
+        </div>
+
+        {% if insights %}
+            <div class="insight-list">
+                {% for insight in insights %}
+                    <div class="insight-card">
+                        <div class="insight-header">
+                            Insight {{ loop.index }}
+                        </div>
+                        <p>{{ insight }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>No insights available.</p>
+        {% endif %}
+
+        <div class="button-group">
+            <a href="/" class="button">Back to Home</a>
+            <a href="/dashboard" class="button">View Dashboard</a>
+            <a href="/analytics" class="button">View Analytics</a>
+            <a href="/records" class="button">View Records</a>
+        </div>
+    </div>
+</body>
+</html>

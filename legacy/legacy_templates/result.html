@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Truck Analysis Result - FleetMind</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+    <div class="container">
+        <h1>Truck Analysis Result</h1>
+
+        <!-- 如果分析记录成功保存到 fleet_history.txt，就显示提示 -->
+        {% if saved %}
+            <p class="success-message">Analysis history saved successfully.</p>
+        {% else %}
+            <p class="warning-message">Analysis history was not saved.</p>
+        {% endif %}
+
+        <!-- 如果新车结构化数据成功保存到 fleet_data.csv，就显示提示 -->
+        {% if csv_saved is defined %}
+            {% if csv_saved %}
+                <p class="success-message">CSV record saved successfully.</p>
+            {% else %}
+                <p class="warning-message">CSV record was not saved.</p>
+            {% endif %}
+        {% endif %}
+
+        <!-- 车辆基本信息 -->
+        <div class="card">
+            <h2>Basic Information</h2>
+
+            <p><strong>Truck ID:</strong> {{ truck.truck_id }}</p>
+            <p><strong>Driver:</strong> {{ truck.driver }}</p>
+            <p><strong>Route:</strong> {{ truck.route }}</p>
+        </div>
+
+        <!-- 收入、成本和利润分析 -->
+        <div class="card">
+            <h2>Financial Analysis</h2>
+
+            <p><strong>Revenue:</strong> ${{ "{:,.2f}".format(truck.revenue) }}</p>
+            <p><strong>Total Cost:</strong> ${{ "{:,.2f}".format(truck.calculate_total_cost()) }}</p>
+            <p>
+                <strong>Profit:</strong>
+                <span class="{{ truck.get_profit_class() }}">
+                    ${{ "{:,.2f}".format(truck.calculate_profit()) }}
+                </span>
+            </p>
+            <p><strong>Profit Margin:</strong> {{ "{:.2f}".format(truck.calculate_profit_margin()) }}%</p>
+        </div>
+
+        <!-- 成本明细 -->
+        <div class="card">
+            <h2>Cost Breakdown</h2>
+
+            <p><strong>Fuel Cost:</strong> ${{ "{:,.2f}".format(truck.fuel_cost) }}</p>
+            <p><strong>Toll Cost:</strong> ${{ "{:,.2f}".format(truck.toll_cost) }}</p>
+            <p><strong>Repair Cost:</strong> ${{ "{:,.2f}".format(truck.repair_cost) }}</p>
+            <p><strong>Salary Cost:</strong> ${{ "{:,.2f}".format(truck.salary_cost) }}</p>
+            <p><strong>Insurance Cost:</strong> ${{ "{:,.2f}".format(truck.insurance_cost) }}</p>
+            <p><strong>Other Cost:</strong> ${{ "{:,.2f}".format(truck.other_cost) }}</p>
+        </div>
+
+        <!-- 风险和建议 -->
+        <div class="card">
+            <h2>Risk and Suggestion</h2>
+
+            <p>
+                <strong>Risk Level:</strong> 
+                <span class="risk-badge {{ truck.get_risk_class() }}">
+                    {{ truck.get_risk_level() }}
+                </span>
+            </p>
+
+            <!-- 
+                get_highest_cost_category() 会返回两个结果：
+                1. 最高成本类别
+                2. 对应金额
+                这里用 [0] 取类别名称，用 [1] 取金额。
+            -->
+            <p>
+                <strong>Main Cost Pressure:</strong>
+                {{ truck.get_highest_cost_category()[0] }}
+                (${{ "{:,.2f}".format(truck.get_highest_cost_category()[1]) }})
+            </p>
+
+            <div class="suggestion-box">
+                <div class="suggestion-title">FleetMind Suggestion</div>
+                <p class="suggestion-text">
+                    🚚 {{ truck.generate_suggestion() }}
+                </p>
+            </div>
+
+        </div>
+
+        <!-- 页面导航按钮 -->
+        <div class="menu">
+            <a href="/samples" class="button">Back to Sample Trucks</a>
+            <a href="/new-truck" class="button">Analyse Another New Truck</a>
+            <a href="/history" class="button">View History</a>
+            <a href="/" class="button">Back to Home</a>
+        </div>
+    </div>
+</body>
+</html>

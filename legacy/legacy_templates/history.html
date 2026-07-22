@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Analysis History - FleetMind</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+    <div class="container">
+        <h1>Analysis History</h1>
+
+        <p>
+            This page shows previous truck analysis records saved in the history file.
+        </p>
+
+        <!-- 
+            history_text 是 app.py 从 fleet_history.txt 读取后传进来的内容。
+            使用 pre 可以保留原来的换行格式，让历史记录更容易看。
+        -->
+        <div class="card">
+            <pre>{{ history_text }}</pre>
+        </div>
+
+        <div class="menu">
+            <a href="/samples" class="button">Analyse a Sample Truck</a>
+            <a href="/new-truck" class="button">Analyse a New Truck</a>
+            <a href="/compare" class="button">Compare Sample Trucks</a>
+            <a href="/" class="button">Back to Home</a>
+        </div>
+    </div>
+</body>
+</html>

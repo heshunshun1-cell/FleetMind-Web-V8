@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Fleet Comparison - FleetMind</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+    <div class="container">
+        <h1>Fleet Comparison</h1>
+
+        <p>
+            This page compares all anonymised sample trucks by profit margin.
+            Trucks are ranked from the highest profit margin to the lowest.
+        </p>
+
+        <!-- 显示整体比较结果 -->
+        <div class="card">
+            <h2>Summary</h2>
+
+            <p><strong>Best Performing Truck:</strong> {{ best_truck.truck_id }}</p>
+            <p><strong>Best Route:</strong> {{ best_truck.route }}</p>
+            <p>
+                <strong>Best Profit Margin:</strong>
+                <span class="profit-positive">
+                    {{ "%.2f"|format(best_truck.calculate_profit_margin()) }}%
+                </span>
+            </p>
+            <hr>
+
+            <p><strong>Highest Risk Truck:</strong> {{ highest_risk_truck.truck_id }}</p>
+            <p><strong>Highest Risk Route:</strong> {{ highest_risk_truck.route }}</p>
+            <p>
+                <strong>Lowest Profit Margin:</strong>
+                <span class="{{ highest_risk_truck.get_profit_class() }}">
+                    {{ "%.2f"|format(highest_risk_truck.calculate_profit_margin()) }}%
+                </span>
+            </p>
+        </div>
+
+        <!-- 显示所有车辆排序表格 -->
+        <div class="card">
+            <h2>Truck Ranking</h2>
+
+            <table>
+                <tr>
+                    <th>Rank</th>
+                    <th>Truck ID</th>
+                    <th>Route</th>
+                    <th>Revenue</th>
+                    <th>Profit</th>
+                    <th>Profit Margin</th>
+                    <th>Risk Level</th>
+                    <th>Main Cost Pressure</th>
+                </tr>
+
+                <!-- 
+                    trucks 是 app.py 传进来的排序后车辆列表。
+                    这里按利润率从高到低显示所有样本车。
+                -->
+                {% for truck in trucks %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ truck.truck_id }}</td>
+                    <td>{{ truck.route }}</td>
+                    <td>${{ "{:,.2f}".format(truck.revenue) }}</td>
+                    <td>
+                        <span class="{{ truck.get_profit_class() }}">
+                            ${{ "{:,.2f}".format(truck.calculate_profit()) }}
+                        </span>
+                    </td>
+                    <td>{{ "{:.2f}".format(truck.calculate_profit_margin()) }}%</td>
+                    <td>
+                        <span class="risk-badge {{ truck.get_risk_class() }}">
+                            {{ truck.get_risk_level() }}
+                        </span>
+                    </td>
+
+                    <td>{{ truck.get_highest_cost_category()[0] }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+
+        <div class="menu">
+            <a href="/samples" class="button">Analyse a Sample Truck</a>
+            <a href="/history" class="button">View History</a>
+            <a href="/" class="button">Back to Home</a>
+        </div>
+    </div>
+</body>
+</html>

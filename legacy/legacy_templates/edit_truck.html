@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit Truck</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <div class="container">
+        <h1>Edit Truck</h1>
+
+        <p class="description">
+            Update this truck record. FleetMind will recalculate total cost,
+            profit, profit margin, risk level, and main cost pressure automatically.
+        </p>
+
+        <!-- 编辑 truck 表单 -->
+        <form method="POST" action="/edit-truck/{{ truck['truck_id'] }}">
+            <label>Truck ID</label>
+            <input type="text" name="truck_id" value="{{ truck['truck_id'] }}" readonly>
+
+            <label>Driver</label>
+            <input type="text" name="driver" value="{{ truck['driver'] }}" required>
+
+            <label>Route</label>
+            <input type="text" name="route" value="{{ truck['route'] }}" required>
+
+            <label>Revenue ($)</label>
+            <input type="number" name="revenue" step="0.01" value="{{ truck['revenue'] }}" required>
+
+            <label>Fuel Cost ($)</label>
+            <input type="number" name="fuel_cost" step="0.01" value="{{ truck['fuel_cost'] }}" required>
+
+            <label>Toll Cost ($)</label>
+            <input type="number" name="toll_cost" step="0.01" value="{{ truck['toll_cost'] }}" required>
+
+            <label>Repair Cost ($)</label>
+            <input type="number" name="repair_cost" step="0.01" value="{{ truck['repair_cost'] }}" required>
+
+            <label>Salary Cost ($)</label>
+            <input type="number" name="salary_cost" step="0.01" value="{{ truck['salary_cost'] }}" required>
+
+            <label>Insurance Cost ($)</label>
+            <input type="number" name="insurance_cost" step="0.01" value="{{ truck['insurance_cost'] }}" required>
+
+            <label>Other Cost ($)</label>
+            <input type="number" name="other_cost" step="0.01" value="{{ truck['other_cost'] }}" required>
+
+            <!-- 保存修改 -->
+            <button type="submit" class="button">Save Changes</button>
+        </form>
+
+        <!-- 页面导航按钮 -->
+        <div class="button-group">
+            <a href="/records" class="button">Back to Truck Records</a>
+            <a href="/dashboard" class="button">View Dashboard</a>
+            <a href="/analytics" class="button">View Analytics</a>
+            <a href="/" class="button">Back to Home</a>
+        </div>
+    </div>
+</body>
+</html>

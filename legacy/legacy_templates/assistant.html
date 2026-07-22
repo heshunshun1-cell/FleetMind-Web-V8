@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Logistics Assistant - FleetMind</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+    <div class="container">
+        <h1>AI Logistics Assistant</h1>
+
+        <p>
+            Ask a simple logistics question about profit, fuel cost, repair cost,
+            toll cost, salary, route, insurance, cost pressure, or risk.
+        </p>
+
+        <!-- 
+            这个表单会把用户输入的问题提交到 /assistant。
+            method="POST" 表示把表单数据发送给 Flask。
+        -->
+        <form action="/assistant" method="POST">
+            <div class="card">
+                <label>Your Question</label>
+
+                <!-- 
+                    name="question" 必须和 app.py 里的 request.form["question"] 对应。
+                    value="{{ question }}" 可以在提交后保留用户刚刚输入的问题。
+                -->
+                <input
+                    type="text"
+                    name="question"
+                    value="{{ question }}"
+                    placeholder="Example: Why is fuel cost high?"
+                    required
+                >
+
+                <button type="submit" class="button">Ask FleetMind</button>
+            </div>
+        </form>
+
+        <!-- 如果 answer 不是空，就显示 AI assistant 的回答 -->
+        {% if answer %}
+            <div class="card">
+                <h2>FleetMind Answer</h2>
+                <p>{{ answer }}</p>
+            </div>
+        {% endif %}
+
+        <div class="info-box">
+            <h3>Example Questions</h3>
+            <p>Why is fuel cost high?</p>
+            <p>How can I reduce business risk?</p>
+            <p>Why is profit margin low?</p>
+            <p>How should I understand route cost?</p>
+        </div>
+
+        <div class="menu">
+            <a href="/compare" class="button">Compare Sample Trucks</a>
+            <a href="/history" class="button">View History</a>
+            <a href="/" class="button">Back to Home</a>
+        </div>
+    </div>
+</body>
+</html>

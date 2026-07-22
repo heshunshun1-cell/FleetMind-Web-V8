@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>FleetMind Analytics</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <div class="container">
+        <h1>FleetMind Analytics</h1>
+
+        <p class="description">
+            This page shows fleet analytics generated from records stored in the 
+            <strong>FleetMind SQLite database</strong>.
+        </p>
+
+
+        <div class="summary-grid">
+            <div class="card">
+                <h3>Total Revenue</h3>
+                <p>${{ "%.2f"|format(summary.total_revenue) }}</p>
+            </div>
+
+            <div class="card">
+                <h3>Total Profit</h3>
+
+                {% if summary.total_profit >= 0 %}
+                    <p class="positive-value">${{ "%.2f"|format(summary.total_profit) }}</p>
+                {% else %}
+                    <p class="negative-value">${{ "%.2f"|format(summary.total_profit) }}</p>
+                {% endif %}
+            </div>
+
+            <div class="card">
+                <h3>Average Profit Margin</h3>
+                
+                {% if summary.average_profit_margin >= 20 %}
+                    <p class="positive-value">{{ "%.2f"|format(summary.average_profit_margin) }}%</p>
+                {% elif summary.average_profit_margin < 0 %}
+                    <p class="negative-value">{{ "%.2f"|format(summary.average_profit_margin) }}%</p>
+                {% else %}
+                    <p class="normal-value">{{ "%.2f"|format(summary.average_profit_margin) }}%</p>
+                {% endif %}
+            </div>
+
+            <div class="card">
+                <h3>Loss-making Trucks</h3>
+
+                {% if summary.loss_making_count > 0 %}
+                    <p class="negative-value">{{ summary.loss_making_count }}</p>
+                {% else %}
+                    <p class="positive-value">{{ summary.loss_making_count }}</p>
+                {% endif %}
+            </div>
+
+        </div>
+
+
+       <div class="card">
+           <h2>Loss-making Trucks</h2>
+           
+           {% if loss_trucks %}
+           
+               <p>The following trucks are currently making a loss.</p>
+
+               {% for truck in loss_trucks %}
+                   <div class="loss-item">
+                       <h3>{{ truck.truck_id }}</h3>
+                       <p>Revenue: ${{ "%.2f"|format(truck.revenue) }}</p>
+                       <p>Total Cost: ${{ "%.2f"|format(truck.total_cost) }}</p>
+                       <p class="negative-value">Profit: ${{ "%.2f"|format(truck.profit) }}</p>
+                       <p>Risk Level: {{ truck.risk_level }}</p>
+                       <p>Main Cost Pressure: {{ truck.highest_cost_category }}</p>
+                    </div>
+               {% endfor %}
+               
+           {% else %}
+               <p>No loss-making trucks detected.</p>
+
+           {% endif %}
+        </div>
+
+
+        <div class="card">
+            <h2>Revenue by Truck</h2>
+            <p>Each bar shows the revenue of one truck.</p>
+
+            <img src="{{ url_for('static', filename='charts/revenue_chart.png') }}" 
+                 alt="Revenue Chart" 
+                 style="width: 100%; max-width: 900px;">
+        </div>
+
+        <div class="card">
+            <h2>Profit by Truck</h2>
+            <p>Each bar shows the profit of one truck.</p>
+            
+            <img src="{{ url_for('static', filename='charts/profit_chart.png') }}" 
+                 alt="Profit Chart" 
+                 style="width: 100%; max-width: 900px;">
+        </div>
+
+        <div class="card">
+            <h2>Risk Level Distribution</h2>
+            <p>This chart shows how many trucks belong to each risk level.</p>
+
+            <img src="{{ url_for('static', filename='charts/risk_chart.png') }}"
+                 alt="Risk Level Distribution Chart"
+                 style="width: 100%; max-width: 900px;">
+        </div>
+
+        <div class="card">
+            <h2>Cost Pressure Distribution</h2>
+            <p>This chart shows the most common main cost pressure among trucks.</p>
+
+            <img src="{{ url_for('static', filename='charts/cost_pressure_chart.png') }}"
+                 alt="Cost Pressure Distribution Chart"
+                 style="width: 100%; max-width: 900px;">
+        </div>
+
+        <br>
+        
+        <div class="menu">
+            <a href="/" class="button">Back to Home</a>
+             <a href="/dashboard" class="button">View Dashboard</a>
+             <a href="/records" class="button">View Records</a>
+        </div>

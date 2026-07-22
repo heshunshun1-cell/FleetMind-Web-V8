@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sample Trucks - FleetMind</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+    <div class="container">
+        <h1>Sample Trucks</h1>
+
+        <p>
+            Choose one anonymised sample truck to view its detailed operating analysis.
+            All data is modified for learning and demonstration purposes.
+        </p>
+
+        <!-- 显示所有样本车辆的区域 -->
+        <div class="truck-list">
+
+            <!-- 
+                trucks 是 app.py 传进来的样本车辆列表。
+                这里用 for loop 把每一辆 truck 都显示成一张 card。
+            -->
+            {% for truck in trucks %}
+                <div class="card">
+                    <h3>{{ truck.truck_id }}</h3>
+
+                    <p><strong>Driver:</strong> {{ truck.driver }}</p>
+                    <p><strong>Route:</strong> {{ truck.route }}</p>
+                    <p><strong>Revenue:</strong> ${{ "{:,.2f}".format(truck.revenue) }}</p>
+
+                    <!-- 这里调用 Truck class 里的方法，计算利润率和风险等级 -->
+                    <p><strong>Profit Margin:</strong> {{ "{:.2f}".format(truck.calculate_profit_margin()) }}%</p>
+                    <p>
+                        <strong>Risk Level:</strong>
+                        <span class="risk-badge {{ truck.get_risk_class() }}">
+                            {{ truck.get_risk_level() }}
+                        </span>
+                    </p>
+
+
+                    <!-- 
+                        loop.index0 表示当前车辆在列表中的位置，从 0 开始。
+                        例如第一辆车是 /sample/0，第二辆车是 /sample/1。
+                    -->
+                    <a href="/sample/{{ loop.index0 }}" class="button">Analyse This Truck</a>
+                </div>
+            {% endfor %}
+        </div>
+
+        <a href="/" class="back-link">Back to Home</a>
+    </div>
+</body>
+</html>

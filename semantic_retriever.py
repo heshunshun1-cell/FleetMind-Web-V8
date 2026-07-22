@@ -1,11 +1,14 @@
 import os
 from sentence_transformers import SentenceTransformer, util
 
+# 导入项目统一配置
+from config import Config
+
 # 知识库文件夹路径
-KNOWLEDGE_BASE_DIR = "knowledge_base"
+KNOWLEDGE_BASE_DIR = Config.KNOWLEDGE_BASE_PATH
 
 # 加在一个轻量级 embedding 模型
-model = SentenceTransformer("all-MiniLM-L6-v2")
+model = SentenceTransformer(Config.EMBEDDING_MODEL_NAME)
 
 def load_documents():
     """
