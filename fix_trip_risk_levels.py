@@ -1,11 +1,15 @@
 import sqlite3
 
+# 导入项目统一配置
+from config import Config
+
 
 def fix_trip_risk_levels():
     """重新计算旧 trip records 的 risk level"""
 
     # 连接数据库
-    conn = sqlite3.connect("fleetmind.db")
+    # 从统一配置中读取数据库路径
+    conn = sqlite3.connect(Config.DATABASE_PATH)
     conn.row_factory = sqlite3.Row
 
     # 读取所有 trip records
